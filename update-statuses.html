@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Corrective Action Statuses</title>
+</head>
+<body>
+    <h1>Update Corrective Action Statuses</h1>
+    <button onclick="updateStatuses()">Update All Corrective Action Statuses</button>
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = `http://${window.location.hostname}:5225/api`;
+        
+        function log(message) {
+            const div = document.getElementById('results');
+            div.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+            console.log(message);
+        }
+
+        async function updateStatuses() {
+            log('🔄 Starting corrective action status update...');
+            
+            try {
+                // First get a summary of current statuses
+                const summaryResponse = await fetch(API_BASE + '/maintenance/corrective-action-status-summary', {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (summaryResponse.ok) {
+                    const summaryData = await summaryResponse.json();
+                    log(`📊 Found ${summaryData.totalCorrectiveActions} corrective actions`);
+                    log(`❗ Status mismatches: ${summaryData.statusMismatches}`);
+                    
+                    if (summaryData.statusMismatches > 0) {
+                        log('🔧 Found mismatches, showing details:');
+                        summaryData.correctiveActions.forEach(ca => {
+                            if (ca.statusMismatch) {
+                                log(`  • CA${ca.id} "${ca.title}": Current="${ca.currentStatus}" → Should be="${ca.calculatedStatus}"`);
+                            }
+                        });
+                    }
+                } else {
+                    log('⚠️ Could not get status summary (endpoint may require admin access)');
+                }
+                
+                // Now try to update statuses
+                const updateResponse = await fetch(API_BASE + '/maintenance/update-corrective-action-statuses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log(`Update Response Status: ${updateResponse.status}`);
+                
+                if (updateResponse.ok) {
+                    const updateData = await updateResponse.json();
+                    log(`✅ Update completed: ${updateData.updated}/${updateData.totalProcessed} records updated`);
+                    log(`📝 Message: ${updateData.message}`);
+                } else {
+                    const error = await updateResponse.text();
+                    log(`❌ Update failed: ${error}`);
+                }
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

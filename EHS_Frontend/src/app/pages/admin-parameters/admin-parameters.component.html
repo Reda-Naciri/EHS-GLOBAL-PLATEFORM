@@ -1,0 +1,692 @@
+<div class="container mx-auto px-4 py-8 mt-15">
+  <!-- Access Denied Message -->
+  <div *ngIf="accessDenied" class="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+    <div class="flex items-center">
+      <i class="fas fa-exclamation-triangle text-red-500 mr-3 text-xl"></i>
+      <div>
+        <h2 class="text-red-800 font-semibold text-lg">Access Denied</h2>
+        <p class="text-red-700 mt-1">{{ accessDeniedMessage }}</p>
+        <p class="text-red-600 text-sm mt-2">You will be redirected to the dashboard shortly...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="mb-8" *ngIf="!accessDenied">
+    <h1 class="text-3xl font-bold text-gray-800">System Parameters</h1>
+    <p class="text-gray-600">Manage zones, injury types, departments, and shifts</p>
+  </header>
+
+  <!-- Loading State -->
+  <div *ngIf="loading && !accessDenied" class="bg-white rounded-lg shadow-md p-8 text-center">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+    <p class="text-gray-600">Loading parameters...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && !accessDenied" class="bg-white rounded-lg shadow-md">
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200">
+      <nav class="flex flex-wrap px-6 py-3 space-x-8">
+        <button
+          (click)="setActiveTab('zones')"
+          [class]="activeTab === 'zones' ? 'tab-active' : 'tab-inactive'"
+          class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors">
+          <i class="fas fa-map-marker-alt mr-2"></i>Zones
+        </button>
+        <button
+          (click)="setActiveTab('injuries')"
+          [class]="activeTab === 'injuries' ? 'tab-active' : 'tab-inactive'"
+          class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors">
+          <i class="fas fa-band-aid mr-2"></i>Injury Types
+        </button>
+        <button
+          (click)="setActiveTab('departments')"
+          [class]="activeTab === 'departments' ? 'tab-active' : 'tab-inactive'"
+          class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors">
+          <i class="fas fa-building mr-2"></i>Departments
+        </button>
+        <button
+          (click)="setActiveTab('shifts')"
+          [class]="activeTab === 'shifts' ? 'tab-active' : 'tab-inactive'"
+          class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors">
+          <i class="fas fa-clock mr-2"></i>Shifts
+        </button>
+        <button
+          (click)="setActiveTab('applications')"
+          [class]="activeTab === 'applications' ? 'tab-active' : 'tab-inactive'"
+          class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors">
+          <i class="fas fa-mobile-alt mr-2"></i>Applications
+        </button>
+        <button
+          (click)="setActiveTab('email')"
+          [class]="activeTab === 'email' ? 'tab-active' : 'tab-inactive'"
+          class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors">
+          <i class="fas fa-envelope mr-2"></i>Email Configuration
+        </button>
+      </nav>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="p-6">
+      <!-- Email Configuration Tab -->
+      <div *ngIf="activeTab === 'email'">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-semibold text-gray-800">Email Configuration</h2>
+          <div class="flex space-x-2">
+            <button
+              (click)="loadEmailConfiguration()"
+              [disabled]="emailLoading"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors disabled:opacity-50">
+              <i class="fas fa-sync mr-2" [class.fa-spin]="emailLoading"></i>Reload Config
+            </button>
+          </div>
+        </div>
+
+        <!-- Email Loading State -->
+        <div *ngIf="emailLoading" class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center mb-6">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p class="text-gray-600">Loading email configuration...</p>
+        </div>
+
+        <!-- Email Timer Component -->
+        <app-email-timer *ngIf="!emailLoading"></app-email-timer>
+
+        <form (ngSubmit)="saveEmailConfiguration()" #emailForm="ngForm" *ngIf="!emailLoading">
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
+            <!-- General Settings -->
+            <div class="border-b border-gray-200 pb-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">General Settings</h3>
+              <div class="space-y-4">
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="emailConfig.isEmailingEnabled"
+                    name="isEmailingEnabled"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                  <span class="ml-3 text-sm font-medium text-gray-700">Enable Email System</span>
+                </label>
+                <p class="text-xs text-gray-500 ml-7">Master switch for all email notifications</p>
+              </div>
+            </div>
+
+            <!-- Profile Assignment Emails -->
+            <div class="border-b border-gray-200 pb-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Profile Assignment Emails</h3>
+              <div class="space-y-4">
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="emailConfig.sendProfileAssignmentEmails"
+                    name="sendProfileAssignmentEmails"
+                    [disabled]="!emailConfig.isEmailingEnabled"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                  <span class="ml-3 text-sm font-medium text-gray-700">Send Assignment Emails to Profile Users</span>
+                </label>
+                <p class="text-xs text-gray-500 ml-7">Notify profile users when they are assigned new sub-actions</p>
+              </div>
+            </div>
+
+            <!-- HSE Email Settings -->
+            <div class="border-b border-gray-200 pb-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">HSE Email Settings</h3>
+              <div class="space-y-4">
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="emailConfig.sendHSEInstantReportEmails"
+                    name="sendHSEInstantReportEmails"
+                    [disabled]="!emailConfig.isEmailingEnabled"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                  <span class="ml-3 text-sm font-medium text-gray-700">Send Instant Report Notifications</span>
+                </label>
+                <p class="text-xs text-gray-500 ml-7">Immediately notify HSE users when new reports are submitted</p>
+
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="emailConfig.sendHSEUpdateEmails"
+                    name="sendHSEUpdateEmails"
+                    [disabled]="!emailConfig.isEmailingEnabled"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                  <span class="ml-3 text-sm font-medium text-gray-700">Send Periodic HSE Update Emails</span>
+                </label>
+
+                <div class="ml-7" *ngIf="emailConfig.sendHSEUpdateEmails">
+                  <label for="hseInterval" class="block text-sm font-medium text-gray-700 mb-1">Update Interval</label>
+                  <select
+                    id="hseInterval"
+                    name="hseUpdateIntervalMinutes"
+                    [(ngModel)]="emailConfig.hseUpdateIntervalMinutes"
+                    [disabled]="!emailConfig.isEmailingEnabled || !emailConfig.sendHSEUpdateEmails"
+                    class="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    (change)="onIntervalChange('hse', $event)">
+                    <option value="2">2 minutes (test only)</option>
+                    <option value="60">1 hour</option>
+                    <option value="120">2 hours</option>
+                    <option value="240">4 hours</option>
+                    <option value="360">6 hours</option>
+                    <option value="480">8 hours</option>
+                    <option value="720">12 hours</option>
+                    <option value="1440">24 hours</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Admin Email Settings -->
+            <div class="border-b border-gray-200 pb-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Admin Email Settings</h3>
+              <div class="space-y-4">
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="emailConfig.sendAdminOverviewEmails"
+                    name="sendAdminOverviewEmails"
+                    [disabled]="!emailConfig.isEmailingEnabled"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                  <span class="ml-3 text-sm font-medium text-gray-700">Send Admin Overview Emails</span>
+                </label>
+
+                <div class="ml-7" *ngIf="emailConfig.sendAdminOverviewEmails">
+                  <label for="adminInterval" class="block text-sm font-medium text-gray-700 mb-1">Update Interval</label>
+                  <select
+                    id="adminInterval"
+                    name="adminOverviewIntervalMinutes"
+                    [(ngModel)]="emailConfig.adminOverviewIntervalMinutes"
+                    [disabled]="!emailConfig.isEmailingEnabled || !emailConfig.sendAdminOverviewEmails"
+                    class="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    (change)="onIntervalChange('admin', $event)">
+                    <option value="2">2 minutes (test only)</option>
+                    <option value="60">1 hour</option>
+                    <option value="120">2 hours</option>
+                    <option value="240">4 hours</option>
+                    <option value="360">6 hours</option>
+                    <option value="480">8 hours</option>
+                    <option value="720">12 hours</option>
+                    <option value="1440">24 hours</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Super Admin Selection -->
+            <div>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Super Admin Email Recipients</h3>
+              <div class="space-y-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-info-circle text-blue-400"></i>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm text-blue-700">
+                        Select specific admin users to receive admin overview emails. Leave none selected to send to all admin users.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Select Admin Users (optional)
+                  </label>
+                  
+                  <!-- Control buttons -->
+                  <div class="flex space-x-2 mb-3" *ngIf="adminUsers.length > 0">
+                    <button
+                      type="button"
+                      (click)="selectAllSuperAdmins()"
+                      [disabled]="!emailConfig.isEmailingEnabled"
+                      class="px-3 py-1 text-xs bg-blue-100 text-blue-700 border border-blue-300 rounded hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                      <i class="fas fa-check-double mr-1"></i>Select All Active
+                    </button>
+                    <button
+                      type="button"
+                      (click)="deselectAllSuperAdmins()"
+                      [disabled]="!emailConfig.isEmailingEnabled"
+                      class="px-3 py-1 text-xs bg-gray-100 text-gray-700 border border-gray-300 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                      <i class="fas fa-times mr-1"></i>Deselect All
+                    </button>
+                  </div>
+                  
+                  <!-- Admin users list -->
+                  <div class="max-h-48 overflow-y-auto border border-gray-300 rounded-md bg-white" 
+                       [class.opacity-50]="!emailConfig.isEmailingEnabled">
+                    <div *ngIf="adminUsers.length === 0" class="p-4 text-center text-gray-500">
+                      <i class="fas fa-spinner fa-spin mr-2"></i>Loading admin users...
+                    </div>
+                    
+                    <div *ngFor="let admin of adminUsers" 
+                         class="flex items-center p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
+                      <label class="flex items-center cursor-pointer w-full" 
+                             [class.cursor-not-allowed]="!emailConfig.isEmailingEnabled">
+                        <input
+                          type="checkbox"
+                          [checked]="isSuperAdminSelected(admin.companyId)"
+                          (change)="toggleSuperAdminSelection(admin.companyId)"
+                          [disabled]="!emailConfig.isEmailingEnabled"
+                          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                        
+                        <div class="ml-3 flex-1">
+                          <div class="flex items-center justify-between">
+                            <div>
+                              <div class="text-sm font-medium text-gray-900">{{ admin.fullName }}</div>
+                              <div class="text-xs text-gray-500">{{ admin.email }}</div>
+                              <div class="text-xs text-gray-400">ID: {{ admin.companyId }}</div>
+                            </div>
+                            <div class="ml-4">
+                              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                                    [ngClass]="admin.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                                <i class="fas mr-1" [ngClass]="admin.isActive ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                                {{ admin.isActive ? 'Active' : 'Inactive' }}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <p class="mt-2 text-xs text-gray-500">
+                    <span class="font-medium">{{ selectedSuperAdminIds.length }}</span> admin user(s) selected. 
+                    Selected users will receive admin overview emails.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="flex justify-end pt-6 border-t border-gray-200">
+              <button
+                type="submit"
+                [disabled]="!emailForm.form.valid || emailLoading"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-save mr-2" *ngIf="!emailLoading"></i>
+                <i class="fas fa-spinner fa-spin mr-2" *ngIf="emailLoading"></i>
+                {{ emailLoading ? 'Saving...' : 'Save Configuration' }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Other Tabs Content -->
+      <div *ngIf="activeTab !== 'email'">
+        <!-- Header with Add Button -->
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-semibold text-gray-800">{{ getCurrentTabName() }}</h2>
+          <button
+            (click)="openCreateModal()"
+            class="btn-primary flex items-center">
+            <i class="fas fa-plus mr-2"></i>Add {{ getCurrentTabName().slice(0, -1) }}
+          </button>
+        </div>
+
+      <!-- Parameters Table -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <!-- Regular Parameters Header -->
+          <thead class="bg-gray-50" *ngIf="activeTab !== 'applications'">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          
+          <!-- Applications Header -->
+          <thead class="bg-gray-50" *ngIf="activeTab === 'applications'">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Icon</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Redirect URL</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <!-- Regular Parameters Body -->
+          <tbody class="bg-white divide-y divide-gray-200" *ngIf="activeTab !== 'applications'">
+            <tr *ngFor="let parameter of getCurrentData(); trackBy: trackById" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="font-medium text-gray-900">{{ parameter.name }}</div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-600 max-w-xs truncate" [title]="parameter.description">
+                  {{ parameter.description || '-' }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                      [ngClass]="getStatusClass(parameter.isActive)">
+                  <i class="fas mr-1" [ngClass]="getStatusIcon(parameter.isActive)"></i>
+                  {{ parameter.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ formatDate(parameter.createdAt || '') }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex items-center justify-end space-x-2">
+                  <!-- Toggle Status -->
+                  <button
+                    (click)="toggleStatus(parameter)"
+                    [class]="parameter.isActive ? 'action-btn-toggle-active' : 'action-btn-toggle-inactive'"
+                    class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    [title]="parameter.isActive ? 'Deactivate' : 'Activate'">
+                    <i class="fas" [ngClass]="parameter.isActive ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                  </button>
+                  
+                  <!-- Edit -->
+                  <button
+                    (click)="openEditModal(parameter)"
+                    class="action-btn action-btn-edit"
+                    title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  
+                  <!-- Delete -->
+                  <button
+                    (click)="deleteParameter(parameter)"
+                    class="action-btn action-btn-delete"
+                    title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Empty State for Regular Parameters -->
+            <tr *ngIf="getCurrentData().length === 0">
+              <td colspan="5" class="px-6 py-12 text-center">
+                <div class="text-gray-400">
+                  <i class="fas fa-inbox text-4xl mb-4"></i>
+                  <p class="text-lg font-medium text-gray-600">No {{ getCurrentTabName().toLowerCase() }} found</p>
+                  <p class="text-sm text-gray-500">Get started by adding your first {{ getCurrentTabName().slice(0, -1).toLowerCase() }}</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+
+          <!-- Applications Body -->
+          <tbody class="bg-white divide-y divide-gray-200" *ngIf="activeTab === 'applications'">
+            <tr *ngFor="let app of applications; trackBy: trackByAppId" class="hover:bg-gray-50">
+              <!-- Icon -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center justify-center w-8 h-8 text-2xl">
+                  <span [innerHTML]="getIconDisplay(app.icon)"></span>
+                </div>
+              </td>
+              
+              <!-- Title -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="font-medium text-gray-900">{{ app.title }}</div>
+              </td>
+              
+              <!-- Redirect URL -->
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-600 max-w-xs truncate" [title]="app.redirectUrl">
+                  <a [href]="app.redirectUrl" target="_blank" class="text-blue-600 hover:text-blue-800">
+                    {{ app.redirectUrl }}
+                  </a>
+                </div>
+              </td>
+              
+              <!-- Order -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  {{ app.order }}
+                </span>
+              </td>
+              
+              <!-- Status -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                      [ngClass]="getStatusClass(app.isActive)">
+                  <i class="fas mr-1" [ngClass]="getStatusIcon(app.isActive)"></i>
+                  {{ app.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              
+              <!-- Actions -->
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex items-center justify-end space-x-2">
+                  <!-- Toggle Status -->
+                  <button
+                    (click)="onToggleApplicationStatus(app)"
+                    [class]="app.isActive ? 'action-btn-toggle-active' : 'action-btn-toggle-inactive'"
+                    class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    [title]="app.isActive ? 'Deactivate' : 'Activate'">
+                    <i class="fas" [ngClass]="app.isActive ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                  </button>
+                  
+                  <!-- Edit -->
+                  <button
+                    (click)="onEditApplication(app)"
+                    class="action-btn action-btn-edit"
+                    title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  
+                  <!-- Delete -->
+                  <button
+                    (click)="onDeleteApplication(app)"
+                    class="action-btn action-btn-delete"
+                    title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Empty State for Applications -->
+            <tr *ngIf="applications.length === 0">
+              <td colspan="6" class="px-6 py-12 text-center">
+                <div class="text-gray-400">
+                  <i class="fas fa-mobile-alt text-4xl mb-4"></i>
+                  <p class="text-lg font-medium text-gray-600">No applications found</p>
+                  <p class="text-sm text-gray-500">Get started by adding your first application</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="showModal" class="modal-backdrop" (click)="closeModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 mr-3">
+          <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+            <i class="fas" [ngClass]="getTabIcon()"></i>
+          </div>
+        </div>
+        <div>
+          <h3>{{ modalTitle }}</h3>
+          <p class="text-xs text-gray-600 mt-1">{{ getModalSubtitle() }}</p>
+        </div>
+      </div>
+      <button type="button" class="close-btn" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <form (ngSubmit)="saveParameter()" #parameterForm="ngForm" class="modal-body">
+      <!-- Name Field -->
+      <div class="mb-4">
+        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          [(ngModel)]="currentParameter.name"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+          [class.border-red-500]="errors['name']"
+          [class.ring-red-500]="errors['name']"
+          placeholder="Enter name">
+        <p *ngIf="errors['name']" class="form-error">{{ errors['name'] }}</p>
+      </div>
+
+      <!-- Code Field (for zones, departments, injury types) -->
+      <div class="mb-4" *ngIf="activeTab !== 'shifts'">
+        <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Code *</label>
+        <input
+          type="text"
+          id="code"
+          name="code"
+          [(ngModel)]="currentParameter.code"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+          [class.border-red-500]="errors['code']"
+          [class.ring-red-500]="errors['code']"
+          placeholder="Enter code">
+        <p *ngIf="errors['code']" class="form-error">{{ errors['code'] }}</p>
+      </div>
+
+      <!-- Description Field -->
+      <div class="mb-4">
+        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <textarea
+          id="description"
+          name="description"
+          [(ngModel)]="currentParameter.description"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+          placeholder="Enter description (optional)"></textarea>
+      </div>
+
+      <!-- Category Field (for injury types only) -->
+      <div class="mb-4" *ngIf="activeTab === 'injuries'">
+        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+        <select
+          id="category"
+          name="category"
+          [(ngModel)]="currentParameter.category"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+          [class.border-red-500]="errors['category']"
+          [class.ring-red-500]="errors['category']">
+          <option value="">Select category</option>
+          <option value="Cut/Laceration">Cut/Laceration</option>
+          <option value="Burn">Burn</option>
+          <option value="Fracture">Fracture</option>
+          <option value="Bruise">Bruise</option>
+          <option value="Strain/Sprain">Strain/Sprain</option>
+          <option value="Other">Other</option>
+        </select>
+        <p *ngIf="errors['category']" class="form-error">{{ errors['category'] }}</p>
+      </div>
+
+      <!-- Shift Time Fields (for shifts only) -->
+      <div class="mb-4" *ngIf="activeTab === 'shifts'">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="startTime" class="block text-sm font-medium text-gray-700 mb-1">Start Time *</label>
+            <input
+              type="time"
+              id="startTime"
+              name="startTime"
+              [(ngModel)]="currentParameter.startTime"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              [class.border-red-500]="errors['startTime']"
+              [class.ring-red-500]="errors['startTime']">
+            <p *ngIf="errors['startTime']" class="form-error">{{ errors['startTime'] }}</p>
+          </div>
+          <div>
+            <label for="endTime" class="block text-sm font-medium text-gray-700 mb-1">End Time *</label>
+            <input
+              type="time"
+              id="endTime"
+              name="endTime"
+              [(ngModel)]="currentParameter.endTime"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              [class.border-red-500]="errors['endTime']"
+              [class.ring-red-500]="errors['endTime']">
+            <p *ngIf="errors['endTime']" class="form-error">{{ errors['endTime'] }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code Field (for shifts only) -->
+      <div class="mb-4" *ngIf="activeTab === 'shifts'">
+        <label for="shiftCode" class="block text-sm font-medium text-gray-700 mb-1">Code *</label>
+        <input
+          type="text"
+          id="shiftCode"
+          name="shiftCode"
+          [(ngModel)]="currentParameter.code"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+          [class.border-red-500]="errors['code']"
+          [class.ring-red-500]="errors['code']"
+          placeholder="Enter shift code">
+        <p *ngIf="errors['code']" class="form-error">{{ errors['code'] }}</p>
+      </div>
+
+      <!-- Active Status -->
+      <div class="mb-6">
+        <label class="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            [(ngModel)]="currentParameter.isActive"
+            name="isActive"
+            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+          <span class="ml-3 text-sm font-medium text-gray-700">Active</span>
+        </label>
+        <p class="mt-1 text-xs text-gray-500">When active, this parameter will be available for selection</p>
+      </div>
+
+      <!-- Modal Actions -->
+      <div class="modal-footer">
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="btn-secondary">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="!parameterForm.form.valid"
+          class="btn-primary">
+          <i class="fas" [ngClass]="modalMode === 'create' ? 'fa-plus' : 'fa-save'" aria-hidden="true"></i>
+          <span class="ml-2">{{ modalMode === 'create' ? 'Create' : 'Update' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Application Management Modal -->
+<app-application-modal
+  [show]="showApplicationModal"
+  [mode]="applicationModalMode"
+  [application]="selectedApplication"
+  [isLoading]="applicationModalLoading"
+  (closeModal)="onCloseApplicationModal()"
+  (submitForm)="onApplicationModalSubmit($event)">
+</app-application-modal>
+
+<!-- Confirmation Dialog -->
+<app-confirmation-dialog
+  [isOpen]="confirmationDialog.show"
+  [title]="confirmationDialog.title"
+  [message]="confirmationDialog.message"
+  [confirmText]="confirmationDialog.confirmText"
+  [cancelText]="confirmationDialog.cancelText"
+  [icon]="confirmationDialog.type"
+  (confirm)="confirmationDialog.onConfirm()"
+  (cancel)="onCloseConfirmation()">
+</app-confirmation-dialog>

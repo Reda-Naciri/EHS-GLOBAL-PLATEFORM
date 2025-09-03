@@ -1,0 +1,94 @@
+<div class="min-h-screen flex flex-col items-center bg-gradient-to-br from-[#e2e2e2] to-[#ECECEC] py-10 relative overflow-hidden">
+  <!-- Header Section -->
+  <div class="w-full py-6 flex justify-center">
+    <img src="https://www.fclane.com/sites/default/files/partner_logos/polamcote-logo2.png"
+         alt="TE Connectivity Logo" class="h-24 md:h-32 lg:h-40">
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">EHS Platform</h1>
+
+    <!-- Expandable Sections -->
+    <div class="flex flex-col lg:flex-row gap-4 w-full max-w-6xl mx-auto">
+
+      <!-- Applications Section -->
+      <div class="expanding-section"
+           [ngClass]="{'expanded': expandedSection === 'apps', 'collapsed': expandedSection === 'reports' || expandedSection === 'assignments'}"
+           (click)="toggleSection('apps')">
+        <div class="flex flex-col items-center">
+          <span class="text-5xl">📱</span>
+          <h2 class="text-xl font-semibold text-gray-700">Applications</h2>
+        </div>
+
+        <div *ngIf="expandedSection === 'apps'" class="grid-container">
+          <!-- Loading State -->
+          <div *ngIf="loading" class="loading-state">
+            <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
+            <p class="text-gray-500 mt-2">Loading applications...</p>
+          </div>
+
+          <!-- Applications Grid -->
+          <div *ngIf="!loading" class="applications-grid">
+            <!-- Application Items -->
+            <div *ngFor="let app of applications" 
+                 class="app-item"
+                 (click)="navigateToApplication(app); $event.stopPropagation()">
+              
+              <!-- Application Content -->
+              <span class="text-4xl" [innerHTML]="getIconDisplay(app.icon)"></span>
+              <p>{{ app.title }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports Section -->
+      <div class="expanding-section"
+           [ngClass]="{'expanded': expandedSection === 'reports', 'collapsed': expandedSection === 'apps' || expandedSection === 'assignments'}"
+           (click)="toggleSection('reports')">
+        <div class="flex flex-col items-center">
+          <span class="text-5xl">📊</span>
+          <h2 class="text-xl font-semibold text-gray-700">Reports</h2>
+        </div>
+
+        <div *ngIf="expandedSection === 'reports'" class="grid-container">
+          <a style="color: black; text-decoration: none;" class="report-item" href="/report/Hasard"><span class="text-4xl">📄</span><p>Hasard Situation</p></a>
+          <a style="color: black; text-decoration: none;" class="report-item" href="/report/Nearhit"><span class="text-4xl">🚨</span><p>Nearhit</p></a>
+          <a style="color: black; text-decoration: none;" class="report-item" href="/report/Enviroment-aspect"><span class="text-4xl">🏭</span><p>Enviroment Aspect</p></a>
+          <a style="color: black; text-decoration: none;" class="report-item" href="/report/Improvement-Idea"><span class="text-4xl">🛠️</span><p>Improvment Idea</p></a>
+          <a style="color: black; text-decoration: none;" class="report-item" href="/report/Incident-Management"><span class="text-4xl">⚠️</span><p>Incident Management</p></a>
+        </div>
+      </div>
+
+      <!-- Portal Section -->
+      <div class="expanding-section"
+           [ngClass]="{'expanded': expandedSection === 'assignments', 'collapsed': expandedSection === 'apps' || expandedSection === 'reports'}"
+           (click)="toggleSection('assignments')">
+        <div class="flex flex-col items-center">
+          <span class="text-5xl">🚪</span>
+          <h2 class="text-xl font-semibold text-gray-700">Portal</h2>
+        </div>
+
+        <div *ngIf="expandedSection === 'assignments'" class="grid-container">
+          <a style="color: black; text-decoration: none;" class="assignment-item" href="/assignments">
+            <span class="text-4xl">📋</span>
+            <p>My Assignments</p>
+          </a>
+          <a style="color: black; text-decoration: none;" class="assignment-item" href="/follow-up">
+            <span class="text-4xl">📈</span>
+            <p>Report Follow-up</p>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGIN BUTTON -->
+    <div class="mt-8 flex justify-center">
+      <a href="/login" class="login-btn transition" style="text-decoration: none; display: inline-block;">
+        LOGIN
+      </a>
+    </div>
+  </div>
+</div>
+

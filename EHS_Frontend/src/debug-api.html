@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Debug</title>
+</head>
+<body>
+    <h1>API Debug Tool</h1>
+    <button onclick="testDashboard()">Test Dashboard API</button>
+    <button onclick="testReports()">Test Reports API</button>
+    <div id="results"></div>
+
+    <script>
+      const API_BASE = `http://${window.location.hostname}:5225/api`;
+        
+        function log(message) {
+            const div = document.getElementById('results');
+            div.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+        }
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                return {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                };
+            }
+            return {
+                'Content-Type': 'application/json'
+            };
+        }
+
+        async function testDashboard() {
+            log('Testing dashboard API...');
+            try {
+                const response = await fetch(API_BASE + '/dashboard/stats', {
+                    headers: getAuthHeaders()
+                });
+                
+                log('Dashboard Response Status: ' + response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('Dashboard Data: ' + JSON.stringify(data, null, 2));
+                } else {
+                    const error = await response.text();
+                    log('Dashboard Error: ' + error);
+                }
+            } catch (error) {
+                log('Dashboard Fetch Error: ' + error.message);
+            }
+        }
+
+        async function testReports() {
+            log('Testing reports API...');
+            try {
+                const response = await fetch(API_BASE + '/reports/recent?limit=5', {
+                    headers: getAuthHeaders()
+                });
+                
+                log('Reports Response Status: ' + response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('Reports Data: ' + JSON.stringify(data, null, 2));
+                } else {
+                    const error = await response.text();
+                    log('Reports Error: ' + error);
+                }
+            } catch (error) {
+                log('Reports Fetch Error: ' + error.message);
+            }
+        }
+
+        // Check if user is logged in
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            log('Auth token found in localStorage');
+        } else {
+            log('No auth token found - need to login first');
+        }
+    </script>
+</body>
+</html>

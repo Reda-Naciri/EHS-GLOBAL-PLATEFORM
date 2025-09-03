@@ -1,0 +1,762 @@
+
+
+<div class="h-16"></div>
+
+<!-- Loading State -->
+<div class="container mx-auto px-4 py-8 max-w-6xl" *ngIf="loading">
+  <div class="text-center">
+    <div class="inline-block animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+    <p class="mt-4 text-gray-600">Loading report details...</p>
+  </div>
+</div>
+
+<!-- Error State -->
+<div class="container mx-auto px-4 py-8 max-w-6xl" *ngIf="error && !loading">
+  <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+    <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+    <h2 class="text-xl font-bold text-red-800 mb-2">Error Loading Report</h2>
+    <p class="text-red-600 mb-4">{{ error }}</p>
+    <button 
+      (click)="goBack()" 
+      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+      Go Back to Reports
+    </button>
+  </div>
+</div>
+
+<div class="container mx-auto px-4 py-8 max-w-6xl" *ngIf="report && !loading && !error">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">{{ report.title }}</h1>
+
+      <p class="text-gray-600">Detailed view of report and corrective actions</p>
+    </div>
+    <div class="flex space-x-3">
+      <!-- HSE Controls -->
+      <button 
+        *ngIf="canOpenReport()" 
+        (click)="onOpenReport()" 
+        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center">
+        <i class="fas fa-folder-open mr-2"></i> Open Report
+      </button>
+      
+      <button 
+        *ngIf="canEndReport()" 
+        (click)="onEndReport()" 
+        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center">
+        <i class="fas fa-times-circle mr-2"></i> End Report
+      </button>
+      
+      <button 
+        (click)="goBack()" 
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center">
+        <i class="fas fa-arrow-left mr-2"></i> Back
+      </button>
+    </div>
+  </div>
+
+  <!-- Report Card -->
+  <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+    <div class="p-6">
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold mb-2">
+            {{ report.type }}
+          </span>
+          <span class="text-xs text-gray-500 ml-2">{{ report.reportDateTime | date: 'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="text-right">
+          <span class="text-sm text-gray-500">Tracking Number</span>
+          <p class="font-mono font-bold text-gray-800">{{ report.trackingNumber }}</p>
+        </div>
+      </div>
+
+      <!-- Restructured Layout: Zone, Work shift, Incident date, Reporter, Description, Attachments -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Reported By</h3>
+          <div class="flex items-center space-x-2">
+            <div class="relative">
+              <img *ngIf="getAvatarUrl(reporterUser); else reporterDefaultAvatar"
+                   [src]="getAvatarUrl(reporterUser!)"
+                   [alt]="getReporterName(report.reporterId) + ' avatar'"
+                   class="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200">
+              <ng-template #reporterDefaultAvatar>
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                  {{ reporterUser ? getUserInitials(reporterUser) : (getReporterName(report.reporterId) | slice:0:2 | uppercase) }}
+                </div>
+              </ng-template>
+            </div>
+            <p class="text-gray-800 font-medium">{{ getReporterName(report.reporterId) }}</p>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Zone</h3>
+          <p class="text-gray-800 font-medium">{{ report.zone }}</p>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Work Shift</h3>
+          <p class="text-gray-800 font-medium">{{ report.workShift }}</p>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Incident Date & Time</h3>
+          <p class="text-gray-800 font-medium">{{ report.incidentDateTime | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+        
+      </div>
+
+      <div class="mb-6" *ngIf="report.assignedHSE">
+        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Assigned HSE</h3>
+        <!-- Debug info -->
+        
+        <div class="flex items-center space-x-2">
+          <div class="relative">
+            <!-- Debug call to help trace the issue -->
+            {{ debugHSEAvatar() }}
+            <img *ngIf="getAvatarUrl(hseAssignedUser); else hseDefaultAvatar"
+                 [src]="getAvatarUrl(hseAssignedUser!)"
+                 [alt]="(hseAssignedUser?.fullName || report.assignedHSE) + ' avatar'"
+                 class="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200"
+                 (error)="onHSEAvatarError($event)">
+            <ng-template #hseDefaultAvatar>
+              <div class="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm">
+                {{ hseAssignedUser ? getUserInitials(hseAssignedUser) : getHSEInitialsFromString(report.assignedHSE) }}
+              </div>
+            </ng-template>
+          </div>
+          <p class="text-gray-800 font-medium">{{ getHSEAssignedName(report.assignedHSE) }}</p>
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Description</h3>
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <p class="text-gray-800">{{ report.description }}</p>
+        </div>
+      </div>
+
+      <div class="mb-6" *ngIf="report.attachments && report.attachments?.length && report.attachments.length > 0">
+        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          Attachments ({{ report.attachments.length }})
+        </h3>
+        
+        <!-- Carousel Container -->
+        <div class="relative">
+          <!-- Navigation arrows - only show if carousel is needed -->
+          <button *ngIf="showCarousel() && canNavigatePrev()"
+                  (click)="prevAttachment()"
+                  class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 z-10 bg-white rounded-full p-2 shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+            <i class="fas fa-chevron-left text-gray-600"></i>
+          </button>
+          
+          <button *ngIf="showCarousel() && canNavigateNext()"
+                  (click)="nextAttachment()"
+                  class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 z-10 bg-white rounded-full p-2 shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+            <i class="fas fa-chevron-right text-gray-600"></i>
+          </button>
+          
+          <!-- Attachments container with slide animation -->
+          <div class="overflow-hidden" *ngIf="showCarousel()">
+            <div class="flex transition-transform duration-500 ease-in-out"
+                 [style.transform]="'translateX(-' + (currentAttachmentIndex * (100 / attachmentsPerView)) + '%)'">
+              <div class="relative group flex-shrink-0 w-1/3 px-2" 
+                   *ngFor="let attachment of report.attachments">
+                <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors w-full"
+                     (click)="downloadAttachment(attachment)">
+                  <i class="fas fa-file mr-2 text-gray-500 flex-shrink-0"></i>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-800 truncate" [title]="attachment.fileName">
+                      {{ attachment.fileName }}
+                    </p>
+                    <p class="text-xs text-gray-500">{{ (attachment.fileSize / 1024) | number:'1.0-1' }} KB</p>
+                  </div>
+                  <i class="fas fa-download ml-2 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Show all attachments when there are few -->
+          <div *ngIf="!showCarousel()" class="flex flex-wrap gap-4">
+            <div class="relative group" *ngFor="let attachment of report.attachments">
+              <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors"
+                   (click)="downloadAttachment(attachment)">
+                <i class="fas fa-file mr-2 text-gray-500"></i>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-800">{{ attachment.fileName }}</p>
+                  <p class="text-xs text-gray-500">{{ (attachment.fileSize / 1024) | number:'1.0-1' }} KB</p>
+                </div>
+                <i class="fas fa-download ml-2 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Progress indicator for carousel -->
+          <div *ngIf="showCarousel()" class="flex justify-center mt-3 space-x-1">
+            <div *ngFor="let _ of getSlideIndicators(); let i = index"
+                 class="w-2 h-2 rounded-full transition-colors cursor-pointer"
+                 [class.bg-blue-500]="i === currentAttachmentIndex"
+                 [class.bg-gray-300]="i !== currentAttachmentIndex"
+                 (click)="goToSlide(i)">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Injured Persons Section -->
+      <div *ngIf="report.type === 'Incident-Management' && report.injuredPersons?.length" class="space-y-6 mb-10 w-full">
+        <div *ngFor="let person of report.injuredPersons" class="bg-white p-6 rounded-lg shadow min-h-[450px] pb-8">
+          <h3 class="text-lg font-semibold text-red-600 mb-4">🩺 Injured Person Details</h3>
+          
+          <div class="flex flex-col lg:flex-row gap-6 items-start h-full">
+            <!-- Left: Injury Info Section -->
+            <div class="flex-1">
+              <p class="mb-2 text-sm"><strong>👤 Name:</strong> {{ person.name }}</p>
+              <p class="mb-2 text-sm" *ngIf="person.department"><strong>🏢 Department:</strong> {{ person.department }}</p>
+              <p class="mb-2 text-sm" *ngIf="person.zoneOfPerson"><strong>🗺️ Zone:</strong> {{ person.zoneOfPerson }}</p>
+              <p class="mb-4 text-sm" *ngIf="person.gender"><strong>🚻 Gender:</strong> {{ person.gender }}</p>
+
+              <div *ngIf="person.injuries?.length">
+                <h4 class="font-semibold text-sm text-gray-700 mb-2">🦴 Injuries:</h4>
+                <ul class="list-disc list-inside text-sm space-y-2 mb-4">
+                  <li *ngFor="let injury of person.injuries" class="leading-relaxed">
+                    <strong>{{ injury.bodyPart }}</strong> - 
+                    <span class="text-blue-600">{{ injury.injuryType }}</span> - 
+                    <span class="text-orange-600 font-medium">{{ injury.severity }}</span> - 
+                    {{ injury.description }}
+                  </li>
+                </ul>
+              </div>
+
+              <div *ngIf="person.injuryDescription">
+                <h4 class="font-semibold text-sm text-gray-700 mb-2">📝 Description:</h4>
+                <p class="text-sm text-gray-700">
+                  {{ isDescriptionExpanded ? person.injuryDescription : (person.injuryDescription | slice:0:120) + '...' }}
+                  <button class="text-blue-600 hover:underline text-xs ml-2" (click)="isDescriptionExpanded = !isDescriptionExpanded" *ngIf="person.injuryDescription && person.injuryDescription.length > 120">
+                    {{ isDescriptionExpanded ? 'See less' : 'See more' }}
+                  </button>
+                </p>
+              </div>
+            </div>
+
+            <!-- Right: Body Map Section -->
+            <div *ngIf="person.injuries?.length" class="flex-shrink-0 self-start -mt-8 ml-2">
+              <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-hidden">
+                <h4 class="text-center font-semibold text-sm text-gray-700 mb-2">📍 Injury Location</h4>
+                <div class="w-[200px] h-[380px] overflow-hidden mx-auto">
+                  <app-body-map [injuries]="person.injuries" mode="view"></app-body-map>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- Recommended Actions -->
+      <div class="mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Left: Actions Description -->
+          <div>
+            <div class="flex items-center gap-3 mb-4">
+              <h3 class="text-lg font-semibold text-gray-800">
+                Recommended Actions
+                <span *ngIf="report.personInChargeOfActions" class="text-sm font-normal text-gray-600">
+                  by {{ report.personInChargeOfActions }}
+                </span>
+              </h3>
+              <span class="px-3 py-1 text-xs font-semibold uppercase tracking-wide border rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800 border-green-300': report.actionStatus === 'Completed',
+                      'bg-yellow-100 text-yellow-800 border-yellow-300': report.actionStatus === 'In Progress',
+                      'bg-red-100 text-red-800 border-red-300': report.actionStatus === 'Not Started' || !report.actionStatus,
+                      'bg-gray-100 text-gray-800 border-gray-300': !report.immediateActionsTaken
+                    }">
+                {{ report.immediateActionsTaken ? (report.actionStatus || 'Not Started') : 'No Actions' }}
+              </span>
+            </div>
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <p class="text-gray-800" *ngIf="report.immediateActionsTaken; else noActions">
+                {{ report.immediateActionsTaken }}
+              </p>
+              <ng-template #noActions>
+                <p class="text-gray-500 italic">No recommended actions have been provided for this report.</p>
+              </ng-template>
+            </div>
+          </div>
+          
+          <!-- Right: Progress Bar -->
+          <div class="flex flex-col justify-center">
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-700">Progress Of the report:</span>
+                <span class="px-3 py-1 text-xs font-semibold uppercase tracking-wide border rounded-full"
+                      [ngClass]="{
+                        'bg-green-100 text-green-800 border-green-300': report.status === 'Closed',
+                        'bg-yellow-100 text-yellow-800 border-yellow-300': report.status === 'Opened',
+                        'bg-red-100 text-red-800 border-red-300': report.status === 'Unopened'
+                      }">
+                  {{ report.status }}
+                </span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-8 overflow-hidden relative flex items-center">
+                <div class="h-8 rounded-full transition-all duration-700 ease-in-out flex items-center justify-center"
+                     [ngClass]="getProgressBarColor()"
+                     [style.width.%]="getActionProgress()">
+                  <span class="text-white text-sm font-semibold" *ngIf="getActionProgress() > 15">
+                    {{ getActionProgress() }}%
+                  </span>
+                </div>
+                <span class="absolute inset-0 flex items-center justify-center text-sm font-semibold" 
+                      [ngClass]="getActionProgress() > 50 ? 'text-white' : 'text-gray-700'"
+                      *ngIf="getActionProgress() <= 15">
+                  {{ getActionProgress() }}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  
+
+  <!-- Corrective Actions -->
+  <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8" *ngIf="canViewCorrectiveActions()">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800 flex items-center">
+            <i class="fas fa-tools mr-3 text-green-600"></i> Corrective Actions
+          </h2>
+          <p class="text-gray-600 mt-1">HSE-created corrective actions to prevent recurrence</p>
+        </div>
+        <div class="flex space-x-2">
+          <button *ngIf="canManageCorrectiveActions()" 
+                  (click)="onCreateCorrectiveAction()"
+                  class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center">
+            <i class="fas fa-plus mr-2"></i> Add Action
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Actions List -->
+    <div *ngIf="report.correctiveActions?.length; else noActionsTemplate" class="space-y-6">
+      <div class="p-6 action-card border-l-4 bg-white rounded-lg shadow-sm" *ngFor="let action of report.correctiveActions" 
+           [class.opacity-60]="getCalculatedActionStatus(action) === 'Aborted'"
+           [ngClass]="getActionBorderClass(getCalculatedActionStatus(action))">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex-1">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                  <i class="fas fa-tools text-green-500 mr-2"></i>
+                  {{ action.title }}
+                  <!-- Overdue indicator for action -->
+                  <span *ngIf="isActionOverdue(action)" 
+                        class="ml-2 text-xs font-bold px-2 py-1 bg-red-100 text-red-800 rounded-full border border-red-300 flex items-center animate-pulse">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    OVERDUE
+                  </span>
+                </h3>
+                
+                <!-- Ownership and Management Indicators -->
+                <div class="flex items-center space-x-2 mt-1">
+                  <!-- Creator Badge -->
+                  <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 flex items-center">
+                    <i class="fas fa-user-edit mr-1"></i>
+                    Created by: {{ getActionCreatorName(action) }}
+                  </span>
+                  
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <!-- Status Badge -->
+                <span class="px-3 py-1 text-xs font-semibold uppercase tracking-wide rounded-full flex items-center"
+                      [ngClass]="getActionStatusClass(getCalculatedActionStatus(action))">
+                  <i [ngClass]="getActionStatusIcon(getCalculatedActionStatus(action))" class="mr-1"></i>
+                  {{ getCalculatedActionStatus(action) }}
+                </span>
+                <!-- Creation Date -->
+                <span *ngIf="action.createdAt" class="text-xs flex items-center text-gray-500">
+                  <i class="fas fa-calendar-plus mr-1"></i>
+                  Created: {{ action.createdAt | date: 'dd/MM/yyyy' }}
+                </span>
+              </div>
+            </div>
+            <div class="mt-2 text-sm text-gray-600" *ngIf="action.description">
+              {{ action.description }}
+            </div>
+            <div class="mt-2 text-sm text-gray-400 italic" *ngIf="!action.description">
+              No description provided
+            </div>
+
+            <!-- Action Details Grid -->
+            <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                
+                <!-- Hierarchy & Priority Row -->
+                <div class="space-y-2">
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 w-20">Hierarchy:</span>
+                    <span class="flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                          [ngClass]="getHierarchyClass(action.hierarchy || 'Elimination')">
+                      <i [ngClass]="getHierarchyIcon(action.hierarchy || 'Elimination')" class="mr-1"></i>
+                      {{ action.hierarchy || 'Elimination' }}
+                    </span>
+                  </div>
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 w-20">Priority:</span>
+                    <span class="flex items-center text-gray-600">
+                      <i class="fas fa-flag mr-1"></i>
+                      {{ action.priority || 'Medium' }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- People Row -->
+                <div class="space-y-2">
+                  
+                </div>
+
+                <!-- Progress Row -->
+                <div class="space-y-2">
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 w-20">Sub-actions:</span>
+                    <span class="flex items-center text-gray-600">
+                      <i class="fas fa-tasks mr-1"></i>
+                      {{ action.subActionsCount || 0 }} total
+                    </span>
+                  </div>
+                  <div class="flex items-center" *ngIf="action.dueDate">
+                    <span class="font-medium text-gray-700 w-20">Due date:</span>
+                    <span class="flex items-center text-gray-600">
+                      <i class="fas fa-calendar-alt mr-1"></i>
+                      {{ action.dueDate | date: 'dd/MM/yyyy' }}
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+          <div class="flex items-center space-x-3">
+            <!-- Sub-actions Progress -->
+            <div class="flex items-center space-x-2" *ngIf="action.subActionsCount > 0">
+              <div class="w-24 bg-gray-200 rounded-full h-2">
+                <div class="bg-green-500 h-2 rounded-full transition-all duration-300"
+                     [style.width.%]="getIndividualActionProgress(action)"></div>
+              </div>
+              <span class="text-xs text-gray-600">{{ getIndividualActionProgress(action) }}%</span>
+            </div>
+            <span *ngIf="action.subActionsCount === 0" class="text-xs text-gray-500 italic">
+              No sub-actions yet
+            </span>
+          </div>
+
+          <div class="flex space-x-2">
+            <!-- Toggle Sub-actions Button -->
+            <button *ngIf="action.subActionsCount > 0"
+                    (click)="onToggleSubActions(action)"
+                    class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition relative">
+              <i class="fas" [ngClass]="isSubActionsExpanded(action.id) ? 'fa-chevron-up' : 'fa-chevron-down'" class="mr-1"></i>
+              {{ isSubActionsExpanded(action.id) ? 'Hide' : 'Show' }} Sub-actions ({{ action.subActionsCount }})
+              <!-- Overdue alert icon for sub-actions -->
+              <i *ngIf="hasOverdueSubActions(action.id)" 
+                 class="fas fa-exclamation-triangle text-red-600 text-xs absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-sm"
+                 title="Some sub-actions are overdue"></i>
+            </button>
+
+            <!-- Add Sub-action Button -->
+            <button *ngIf="canCreateSubActionForAction(action)"
+                    (click)="onAddSubAction(action)"
+                    class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 transition">
+              <i class="fas fa-plus mr-1"></i>
+              Add Sub-action
+            </button>
+
+            <!-- Admin can abort actions they didn't create -->
+            <button *ngIf="canAbortAction(action)"
+                    (click)="onAbortAction(action)"
+                    class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition">
+              <i class="fas fa-times mr-1"></i>
+              Abort
+            </button>
+
+            <!-- Aborted Label -->
+            <span *ngIf="getCalculatedActionStatus(action) === 'Aborted'" 
+                  class="px-3 py-1 text-sm bg-gray-100 text-gray-500 rounded italic">
+              <i class="fas fa-ban mr-1"></i>
+              Action Aborted
+            </span>
+          </div>
+        </div>
+
+        <!-- Sub-actions Dropdown -->
+        <div *ngIf="isSubActionsExpanded(action.id)" class="mt-4 border-t border-gray-200 pt-4">
+          <div class="space-y-3">
+            <h4 class="text-sm font-semibold text-gray-700 flex items-center">
+              <i class="fas fa-tasks mr-2 text-blue-500"></i>
+              Sub-actions ({{ action.subActionsCount }})
+            </h4>
+            
+            <!-- Sub-actions List -->
+            <div *ngIf="getSubActionsForAction(action.id).length > 0" class="space-y-2 ml-6">
+              <div *ngFor="let subAction of getSubActionsForAction(action.id)" 
+                   class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                <div class="flex justify-between items-start mb-2">
+                  <div class="flex-1">
+                    <h5 class="font-medium text-gray-900 text-sm flex items-center">
+                      {{ subAction.title }}
+                      <!-- Overdue indicator for sub-action -->
+                      <span *ngIf="isSubActionOverdue(subAction)" 
+                            class="ml-2 text-xs font-bold px-2 py-1 bg-red-100 text-red-800 rounded-full border border-red-300 flex items-center animate-pulse">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        OVERDUE
+                      </span>
+                    </h5>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium"
+                          [ngClass]="getSubActionStatusClass(subAction.status)">
+                      {{ subAction.status }}
+                    </span>
+                    <button *ngIf="subAction.status !== 'Canceled' && canManageAction(action)"
+                            type="button"
+                            class="text-red-600 hover:text-red-800 text-xs px-2 py-1 rounded border border-red-300 hover:border-red-500 transition-colors"
+                            (click)="onCancelSubAction(subAction)"
+                            title="Cancel sub-action">
+                      <i class="fas fa-times mr-1"></i>
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+                
+                <p *ngIf="subAction.description" class="text-gray-600 text-xs mb-2">
+                  {{ subAction.description }}
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                  <div class="flex items-center">
+                    <i class="fas fa-user text-gray-400 mr-1"></i>
+                    <span class="text-gray-600">{{ getSubActionAssignedUser(subAction.assignedToId) }}</span>
+                  </div>
+                  <div *ngIf="subAction.dueDate" class="flex items-center">
+                    <i class="fas fa-calendar-alt mr-1" [class]="isSubActionOverdue(subAction) ? 'text-red-400' : 'text-gray-400'"></i>
+                    <span [class]="isSubActionOverdue(subAction) ? 'text-red-600 font-semibold' : 'text-gray-600'">
+                      {{ subAction.dueDate | date: 'dd/MM/yyyy' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Empty state -->
+            <div *ngIf="getSubActionsForAction(action.id).length === 0" class="ml-6 text-center py-4">
+              <i class="fas fa-tasks text-gray-300 text-2xl mb-2"></i>
+              <p class="text-gray-500 text-sm">Loading sub-actions...</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Empty State Template -->
+    <ng-template #noActionsTemplate>
+      <div class="p-12 text-center">
+        <div class="text-gray-400 mb-4">
+          <i class="fas fa-tools text-6xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No Corrective Actions</h3>
+        <p class="text-gray-500 mb-6">
+          <span *ngIf="!canManageCorrectiveActions()">No corrective actions have been created for this report yet.</span>
+          <span *ngIf="canManageCorrectiveActions()">Create the first corrective action to address this report and prevent future incidents.</span>
+        </p>
+        <button *ngIf="canManageCorrectiveActions()" 
+                (click)="onCreateCorrectiveAction()"
+                class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center mx-auto">
+          <i class="fas fa-plus mr-2"></i> Create First Action
+        </button>
+      </div>
+    </ng-template>
+
+  </div>
+
+
+  <!-- Comments -->
+  <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-bold text-gray-800 flex items-center">
+        <i class="fas fa-comments mr-3 text-blue-600"></i> Comments & Updates
+      </h2>
+    </div>
+
+    <div class="p-6 space-y-6">
+      <div class="flex" *ngFor="let comment of report.comments">
+        <div class="flex-shrink-0 mr-4">
+          <div class="relative">
+            <img *ngIf="getCommentUserAvatar(comment); else commentDefaultAvatar"
+                 [src]="getCommentUserAvatar(comment)!"
+                 [alt]="comment.userName + ' avatar'"
+                 class="h-10 w-10 rounded-full object-cover ring-2 ring-gray-200">
+            <ng-template #commentDefaultAvatar>
+              <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                {{ getCommentUserInitials(comment.userName) }}
+              </div>
+            </ng-template>
+          </div>
+        </div>
+        <div class="flex-1">
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-medium text-gray-800">{{ comment.userName }}</span>
+              <span class="text-sm text-gray-500">{{ comment.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <p class="text-gray-700">{{ comment.content }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Comment -->
+      <div class="flex" *ngIf="canAddComments() && !isReportClosed()">
+        <div class="flex-shrink-0 mr-4">
+          <div class="relative">
+            <img *ngIf="getAvatarUrl(currentUser); else currentUserDefaultAvatar"
+                 [src]="getAvatarUrl(currentUser!)"
+                 [alt]="(currentUser?.fullName || 'User') + ' avatar'"
+                 class="h-10 w-10 rounded-full object-cover ring-2 ring-gray-200">
+            <ng-template #currentUserDefaultAvatar>
+              <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                {{ getCurrentUserInitials() }}
+              </div>
+            </ng-template>
+          </div>
+        </div>
+        <div class="flex-1">
+          <form (ngSubmit)="onAddComment()" #commentForm="ngForm">
+            <textarea rows="3"
+                      name="content"
+                      [(ngModel)]="newComment.content"
+                      required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Add a comment..."></textarea>
+            <div class="flex justify-end mt-2">
+              <button type="submit"
+                      [disabled]="!commentForm.valid || !newComment.content.trim()"
+                      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                Post Comment
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Disabled message when report is closed -->
+      <div *ngIf="isReportClosed()" class="text-center py-4 text-gray-500 italic">
+        Comments are disabled - Report has been closed
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Corrective Action Modal -->
+<app-corrective-action-modal
+  [show]="showCorrectiveActionModal"
+  [isLoading]="correctiveActionLoading"
+  [error]="correctiveActionError"
+  [priorityOptions]="priorityOptions"
+  [hierarchyOptions]="hierarchyOptions"
+  (closeModal)="onCloseCorrectiveActionModal()"
+  (submitForm)="onSubmitCorrectiveAction($event)">
+</app-corrective-action-modal>
+
+<!-- SubAction Modal -->
+<app-sub-action-modal
+  [show]="showSubActionModal"
+  [mode]="subActionModalMode"
+  [action]="selectedActionForSubActions"
+  [subActions]="existingSubActions"
+  [isLoading]="subActionLoading"
+  [error]="subActionError"
+  [statusOptions]="subActionStatusOptions"
+  [allUsers]="allUsers"
+  (closeModal)="onCloseSubActionModal()"
+  (submitForm)="onCreateSubAction($event)">
+</app-sub-action-modal>
+
+<!-- Custom Abort Action Modal -->
+<div *ngIf="showAbortModal" class="abort-message-overlay" (click)="onCloseAbortModal()">
+  <div class="abort-message-content" (click)="$event.stopPropagation()">
+    <div class="abort-message-header">
+      <div class="abort-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3 class="abort-title">Abort Action</h3>
+    </div>
+    
+    <p class="abort-description">
+      Are you sure you want to abort the action "<strong>{{ selectedActionToAbort?.title }}</strong>"? 
+      This action cannot be undone and all related sub-actions will be canceled.
+    </p>
+    
+    <div class="abort-reason-box">
+      <div class="abort-reason-label">Reason for Abortion:</div>
+      <textarea 
+        [(ngModel)]="abortReason"
+        placeholder="Please provide a detailed reason for aborting this action..."
+        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+        rows="3"
+        maxlength="500">
+      </textarea>
+      <div class="text-sm text-gray-500 mt-2">{{ abortReason.length }}/500 characters</div>
+    </div>
+    
+    <div class="abort-actions">
+      <button 
+        type="button"
+        (click)="onCloseAbortModal()"
+        class="abort-btn abort-btn-cancel">
+        Cancel
+      </button>
+      <button 
+        type="button"
+        (click)="onConfirmAbort()"
+        [disabled]="!abortReason.trim()"
+        class="abort-btn abort-btn-confirm"
+        [class.opacity-50]="!abortReason.trim()"
+        [class.cursor-not-allowed]="!abortReason.trim()">
+        <i class="fas fa-times mr-2"></i>
+        Abort Action
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Dialog -->
+<app-confirmation-dialog
+  [isOpen]="confirmationDialog.isOpen"
+  [title]="confirmationDialog.title"
+  [message]="confirmationDialog.message"
+  [confirmText]="confirmationDialog.confirmText"
+  [cancelText]="confirmationDialog.cancelText"
+  [confirmButtonClass]="confirmationDialog.confirmButtonClass"
+  [cancelButtonClass]="confirmationDialog.cancelButtonClass"
+  [icon]="confirmationDialog.icon"
+  (confirm)="onConfirmAction()"
+  (cancel)="onCancelAction()"
+  (close)="closeConfirmation()">
+</app-confirmation-dialog>
+
+<!-- Alert Container -->
+<app-alert-container></app-alert-container>

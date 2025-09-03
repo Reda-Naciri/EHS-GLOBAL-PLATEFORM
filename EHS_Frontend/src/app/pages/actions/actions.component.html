@@ -1,0 +1,542 @@
+<div class="container mx-auto px-4 py-8 mt-15">
+  <!-- Header -->
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">HSE Actions Dashboard</h1>
+    <p class="text-gray-600">Track and manage all HSE department actions and sub-actions</p>
+    <div *ngIf="error" class="mt-4 p-3 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded">
+      <i class="fas fa-exclamation-triangle mr-2"></i>{{ error }}
+    </div>
+  </header>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="mb-8 text-center py-8">
+    <i class="fas fa-spinner fa-spin text-blue-600 text-2xl mb-4"></i>
+    <p class="text-gray-600">Loading actions...</p>
+  </div>
+
+  <!-- KPIs Section -->
+  <section *ngIf="!loading" class="mb-8 grid grid-cols-1 md:grid-cols-6 gap-4">
+    <div class="kpi-card bg-white rounded-lg shadow p-4 flex items-center">
+      <div class="bg-blue-100 p-3 rounded-full mr-3">
+        <i class="fas fa-tasks text-blue-600 text-lg"></i>
+      </div>
+      <div>
+        <h3 class="text-gray-500 text-xs font-medium">Total Actions</h3>
+        <p class="text-xl font-bold text-gray-800">{{ totalActions }}</p>
+        <p class="text-xs text-gray-500">{{ completionRate }}</p>
+      </div>
+    </div>
+    <div class="kpi-card bg-white rounded-lg shadow p-4 flex items-center">
+      <div class="bg-green-100 p-3 rounded-full mr-3">
+        <i class="fas fa-check-circle text-green-600 text-lg"></i>
+      </div>
+      <div>
+        <h3 class="text-gray-500 text-xs font-medium">Completed</h3>
+        <p class="text-xl font-bold text-gray-800">{{ completedActions }}</p>
+      </div>
+    </div>
+    <div class="kpi-card bg-white rounded-lg shadow p-4 flex items-center">
+      <div class="bg-yellow-100 p-3 rounded-full mr-3">
+        <i class="fas fa-clock text-yellow-600 text-lg"></i>
+      </div>
+      <div>
+        <h3 class="text-gray-500 text-xs font-medium">In Progress</h3>
+        <p class="text-xl font-bold text-gray-800">{{ inProgressActions }}</p>
+      </div>
+    </div>
+    <div class="kpi-card bg-white rounded-lg shadow p-4 flex items-center">
+      <div class="bg-gray-100 p-3 rounded-full mr-3">
+        <i class="fas fa-play text-gray-600 text-lg"></i>
+      </div>
+      <div>
+        <h3 class="text-gray-500 text-xs font-medium">Not Started</h3>
+        <p class="text-xl font-bold text-gray-800">{{ notStartedActions }}</p>
+      </div>
+    </div>
+    <div class="kpi-card bg-white rounded-lg shadow p-4 flex items-center">
+      <div class="bg-red-100 p-3 rounded-full mr-3">
+        <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+      </div>
+      <div>
+        <h3 class="text-gray-500 text-xs font-medium">Overdue</h3>
+        <p class="text-xl font-bold text-gray-800">{{ overdueActions }}</p>
+      </div>
+    </div>
+    <div class="kpi-card bg-white rounded-lg shadow p-4 flex items-center">
+      <div class="bg-purple-100 p-3 rounded-full mr-3">
+        <i class="fas fa-ban text-purple-600 text-lg"></i>
+      </div>
+      <div>
+        <h3 class="text-gray-500 text-xs font-medium">Canceled/Aborted</h3>
+        <p class="text-xl font-bold text-gray-800">{{ canceledOrAbortedActions }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters and Controls -->
+  <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="relative flex-shrink-0">
+          <select class="block appearance-none bg-gray-100 border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded leading-tight focus:outline-none focus:bg-white focus:border-blue-500 min-w-[160px] max-w-xs"
+                  [(ngModel)]="selectedHierarchy" (change)="filterActions()">
+            <option value="All">All Categories</option>
+            <option *ngFor="let h of hierarchies.slice(1)" [value]="h">{{ h }}</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-700">
+            <i class="fas fa-chevron-down text-xs"></i>
+          </div>
+        </div>
+        <div class="relative flex-shrink-0">
+          <select class="block appearance-none bg-gray-100 border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded leading-tight focus:outline-none focus:bg-white focus:border-blue-500 min-w-[140px] max-w-xs"
+                  [(ngModel)]="selectedStatus" (change)="filterActions()">
+            <option value="All">All Status</option>
+            <option *ngFor="let status of statuses.slice(1)" [value]="status">{{ status }}</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-700">
+            <i class="fas fa-chevron-down text-xs"></i>
+          </div>
+        </div>
+        <div class="relative flex-shrink-0">
+          <select class="block appearance-none bg-gray-100 border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded leading-tight focus:outline-none focus:bg-white focus:border-blue-500 min-w-[130px] max-w-xs"
+                  [(ngModel)]="selectedPriority" (change)="filterActions()">
+            <option value="All">All Priority</option>
+            <option *ngFor="let priority of priorities.slice(1)" [value]="priority">{{ priority }}</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-700">
+            <i class="fas fa-chevron-down text-xs"></i>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[340px] max-w-[400px]">
+          <input type="text" placeholder="Search by title, author, assignee, report..." 
+                 [(ngModel)]="searchTerm" (input)="filterActions()"
+                 class="w-full bg-gray-100 border border-gray-200 text-gray-700 py-2 px-4 pr-10 rounded leading-tight focus:outline-none focus:bg-white focus:border-blue-500">
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <i class="fas fa-search"></i>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded flex items-center"
+                  (click)="onCreateNewAction()">
+            <i class="fas fa-plus mr-2"></i> New Action
+          </button>
+          <button class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded flex items-center"
+                  (click)="loadAllActions()" [disabled]="loading">
+            <i class="fas fa-sync-alt mr-2" [class.fa-spin]="loading"></i> Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Toggle -->
+  <div class="flex border-b mb-6">
+    <button [class]="viewMode === 'block' ? 'tab-active' : 'tab-inactive'" 
+            (click)="setViewMode('block')"
+            class="px-4 py-2 font-medium text-sm focus:outline-none">
+      <i class="fas fa-th-large mr-2"></i> Block View
+    </button>
+    <button [class]="viewMode === 'calendar' ? 'tab-active' : 'tab-inactive'" 
+            (click)="setViewMode('calendar')"
+            class="px-4 py-2 font-medium text-sm focus:outline-none">
+      <i class="fas fa-calendar-alt mr-2"></i> Calendar View
+    </button>
+  </div>
+
+  <!-- Block View -->
+  <div *ngIf="viewMode === 'block' && !loading" class="flex flex-col gap-6">
+    <div *ngIf="filteredActions.length > 0; else noActions">
+      <div *ngFor="let action of filteredActions; trackBy: trackByActionId" 
+           class="action-card rounded-lg shadow overflow-hidden w-full flex flex-col mb-4"
+           [ngClass]="getStatusBorderClass(action)">
+        <div class="p-6">
+          <!-- Header with Priority and Creation Date -->
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold px-2 py-1 rounded-full" 
+                    [ngClass]="getPriorityColorClass(action.priority || 'Medium')">
+                {{ action.priority || 'Medium' }}
+              </span>
+              <span class="flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                    [ngClass]="getHierarchyClass(action.hierarchy)">
+                <i [ngClass]="getHierarchyIcon(action.hierarchy)" class="mr-1"></i>
+                {{ action.hierarchy }}
+              </span>
+            </div>
+            <div class="text-xs text-gray-500">
+              Created: {{ formatDate(action.createdAt || action.dueDate) }}
+            </div>
+          </div>
+          
+          <!-- Title and Description -->
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ action.title }}</h3>
+          <p class="text-gray-600 mb-3 text-sm">{{ action.description }}</p>
+          
+          <!-- Status, Deadline, Report, and Controls -->
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center mr-2 border border-gray-300">
+                <i class="fas fa-user text-gray-700 text-sm"></i>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-sm text-gray-700">{{ action.createdByName || 'Unknown Author' }}</span>
+                <span *ngIf="isAdmin()" class="text-xs text-gray-500">Author</span>
+              </div>
+            </div>
+            
+            <!-- Report Information -->
+            <div class="flex items-center">
+              <button *ngIf="action.reportTrackingNumber; else noReport" 
+                      class="flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition-colors cursor-pointer"
+                      (click)="navigateToReport(action.reportId)"
+                      [title]="'View Report: ' + action.reportTrackingNumber + (action.reportTitle ? ' - ' + action.reportTitle : '')">
+                <i class="fas fa-file-alt text-blue-600 text-xs"></i>
+                <span class="text-xs font-semibold text-blue-800">{{ action.reportTrackingNumber }}</span>
+                <i class="fas fa-external-link-alt text-blue-500 text-xs ml-1"></i>
+              </button>
+              <ng-template #noReport>
+                <div class="flex items-center gap-1 px-2 py-1 bg-gray-50 border border-gray-200 rounded">
+                  <i class="fas fa-file text-gray-400 text-xs"></i>
+                  <span class="text-xs text-gray-500">No Report</span>
+                </div>
+              </ng-template>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium px-3 py-1 rounded-full border" 
+                    [ngClass]="getStatusClass(action.status)">
+                {{ action.status }}
+              </span>
+              <!-- Overdue badge -->
+              <span *ngIf="action.overdue" 
+                    class="text-xs font-bold px-2 py-1 bg-red-100 text-red-800 rounded-full border border-red-300 flex items-center animate-pulse">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                OVERDUE
+              </span>
+            </div>
+            
+            <div class="flex items-center">
+              <i class="fas fa-calendar-day text-gray-700 mr-2"></i>
+              <span class="text-sm font-medium" [class]="action.overdue ? 'text-red-600 font-semibold' : 'text-gray-700'">
+                {{ formatDate(action.dueDate) }}
+              </span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <!-- Abort Button (only for non-completed actions and if user has permission) -->
+              <button *ngIf="action.status !== 'Completed' && action.status !== 'Canceled' && action.status !== 'Aborted' && canAbortAction(action)" 
+                      class="text-red-600 hover:text-red-800 px-3 py-2 rounded-lg hover:bg-red-50 border border-red-300 text-xs font-medium flex items-center gap-1"
+                      (click)="onAbortAction(action)"
+                      title="Abort Action">
+                <i class="fas fa-ban"></i>
+                <span>Abort</span>
+              </button>
+              
+              <button class="toggle-details text-gray-700 hover:text-gray-900 p-2 rounded-full hover:bg-gray-100 border border-gray-300 relative"
+                      (click)="toggleDetails(action.id)">
+                <i class="fas" [ngClass]="isDetailsExpanded(action.id) ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                <span class="ml-1 text-xs">Sub-actions ({{ getSubActionsCount(action) }})</span>
+                <!-- Overdue alert icon -->
+                <i *ngIf="hasOverdueSubActions(action)" 
+                   class="fas fa-exclamation-triangle text-red-600 text-xs absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-sm"
+                   title="Some sub-actions are overdue"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enhanced Sub-actions Dropdown -->
+        <div *ngIf="isDetailsExpanded(action.id)" class="details-dropdown border-t border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100">
+          <!-- Sub-actions Header -->
+          <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-tasks text-blue-600 text-sm"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-800">Sub-actions</h4>
+                <p class="text-xs text-gray-600">{{ getActiveSubActionsCount(action) }} active of {{ getSubActionsCount(action) }} total</p>
+              </div>
+            </div>
+            <button *ngIf="canCreateSubAction(action)" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium flex items-center px-3 py-2 rounded-lg shadow-sm transition-colors" 
+                    (click)="onAddSubAction(action)">
+              <i class="fas fa-plus mr-2"></i> Add Sub-action
+            </button>
+          </div>
+          
+          <!-- Sub-actions List -->
+          <div *ngIf="getSubActionsCount(action) > 0; else noSubActions" class="space-y-4 p-2">
+            <div *ngFor="let subAction of action.subActions; trackBy: trackBySubActionId" 
+                 class="subaction-item p-4 hover:bg-white transition-colors border-l-4 rounded-lg shadow-sm"
+                 [ngClass]="subAction.overdue ? 'border-l-red-400 bg-red-50' : (subAction.status === 'Completed' ? 'border-l-green-400' : 'border-l-blue-400')">
+              
+              <!-- Sub-action Header -->
+              <div class="flex justify-between items-start mb-3">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <h5 class="font-semibold text-gray-800 text-sm">{{ subAction.title }}</h5>
+                    <span *ngIf="subAction.overdue" class="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                      <i class="fas fa-exclamation-triangle mr-1"></i> OVERDUE
+                    </span>
+                  </div>
+                  <p class="text-sm text-gray-600 leading-relaxed">{{ subAction.description }}</p>
+                </div>
+                <span class="text-xs font-semibold px-3 py-1 rounded-full border ml-3" 
+                      [ngClass]="getSubActionStatusClass(subAction.status)">
+                  {{ subAction.status }}
+                </span>
+              </div>
+              
+              <!-- Sub-action Details -->
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                  <i class="fas fa-user-tie text-blue-600"></i>
+                  <div>
+                    <span class="text-xs text-gray-500 block">Assigned to</span>
+                    <span class="font-medium text-gray-800">{{ subAction.assignedToName || 'Unassigned' }}</span>
+                  </div>
+                </div>
+                
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                  <i class="fas fa-calendar-day" [class]="subAction.overdue ? 'text-red-600' : 'text-blue-600'"></i>
+                  <div>
+                    <span class="text-xs text-gray-500 block">Due Date</span>
+                    <span class="font-medium" [class]="subAction.overdue ? 'text-red-600' : 'text-gray-800'">
+                      {{ formatDate(subAction.dueDate) }}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                  <i class="fas fa-edit text-blue-600"></i>
+                  <div>
+                    <span class="text-xs text-gray-500 block">Last Updated</span>
+                    <span class="font-medium text-gray-800">{{ formatDateTime(subAction.updatedAt) }}</span>
+                  </div>
+                </div>
+                
+                <div class="flex items-center justify-end gap-2">
+                  <button *ngIf="subAction.status !== 'Completed' && subAction.status !== 'Canceled' && canCancelSubAction(action, subAction)" 
+                          class="text-red-600 hover:text-red-800 text-xs px-3 py-2 rounded-lg border border-red-300 hover:bg-red-50 transition-all duration-200 flex items-center gap-1"
+                          (click)="onCancelSubAction(subAction)">
+                    <i class="fas fa-ban"></i> Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- No Sub-actions State -->
+          <ng-template #noSubActions>
+            <div class="p-8 text-center">
+              <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-tasks text-gray-400 text-2xl"></i>
+              </div>
+              <h5 class="font-medium text-gray-800 mb-2">No sub-actions yet</h5>
+              <p class="text-sm text-gray-600 mb-4">Break down this action into smaller, manageable tasks to track progress more effectively.</p>
+              <button *ngIf="canCreateSubAction(action)" 
+                      class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg transition-colors"
+                      (click)="onAddSubAction(action)">
+                <i class="fas fa-plus mr-2"></i> Create First Sub-action
+              </button>
+              <p *ngIf="!canCreateSubAction(action)" class="text-sm text-gray-500">
+                Only the action author can create sub-actions.
+              </p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar View -->
+  <div *ngIf="viewMode === 'calendar' && !loading" class="bg-white rounded-lg shadow p-6">
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-gray-800">Action Deadlines Calendar</h2>
+        <div class="flex items-center space-x-2">
+          <button (click)="navigateCalendar('prev')" class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span class="font-medium text-gray-700 min-w-[180px] text-center">{{ getCalendarTitle() }}</span>
+          <button (click)="navigateCalendar('next')" class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Calendar Legend -->
+      <div class="flex flex-wrap gap-4 mb-4 text-sm">
+        <div class="flex items-center">
+          <div class="w-3 h-3 bg-green-500 rounded mr-2"></div>
+          <span>Completed</span>
+        </div>
+        <div class="flex items-center">
+          <div class="w-3 h-3 bg-yellow-500 rounded mr-2"></div>
+          <span>In Progress</span>
+        </div>
+        <div class="flex items-center">
+          <div class="w-3 h-3 bg-gray-500 rounded mr-2"></div>
+          <span>Not Started</span>
+        </div>
+        <div class="flex items-center">
+          <div class="w-3 h-3 bg-red-500 rounded mr-2 relative">
+            <div class="absolute inset-0 bg-gray-400" style="height: 1px; top: 50%; transform: translateY(-50%);"></div>
+          </div>
+          <span>Canceled/Aborted</span>
+        </div>
+        <div class="flex items-center">
+          <i class="fas fa-exclamation-triangle text-red-600 text-sm mr-2"></i>
+          <span>Overdue</span>
+        </div>
+        <div class="flex items-center">
+          <div class="w-3 h-3 bg-purple-500 rounded mr-2"></div>
+          <span>Sub-actions</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Calendar Grid -->
+    <div class="grid grid-cols-7 gap-1">
+      <!-- Calendar Header -->
+      <div *ngFor="let day of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" 
+           class="p-3 text-center font-medium text-gray-600 bg-gray-50 border">
+        {{ day }}
+      </div>
+      
+      <!-- Calendar Days -->
+      <div *ngFor="let day of getCalendarDays()" 
+           class="min-h-[120px] p-2 border border-gray-200 relative"
+           [ngClass]="getCalendarDayClass(day)">
+        
+        <!-- Day Number -->
+        <div class="font-medium text-sm mb-1" 
+             [ngClass]="day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'">
+          {{ day.date.getDate() }}
+        </div>
+        
+        <!-- Actions and Sub-actions for this day -->
+        <div class="space-y-1">
+          <div *ngFor="let item of getActionsAndSubActionsForDay(day.date)" 
+               class="text-xs p-1 rounded cursor-pointer truncate"
+               [ngClass]="getActionCalendarClass(item.action)"
+               [title]="getCalendarItemTitle(item)"
+               (click)="onViewActionDetails(item.action)">
+            <div class="flex items-center">
+              <!-- Show overdue alert icon if overdue, otherwise show status dot -->
+              <i *ngIf="item.action.overdue" class="fas fa-exclamation-triangle text-red-600 text-xs mr-1" title="Overdue"></i>
+              <div *ngIf="!item.action.overdue" class="w-2 h-2 rounded-full mr-1" [ngClass]="getActionDotClass(item.action)"></div>
+              <span class="truncate" [ngClass]="getCalendarTextClass(item.action)">
+                <span *ngIf="item.isSubAction" class="text-purple-600 font-medium">Sub: </span>{{ item.title }}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Overflow indicator -->
+        <div *ngIf="getActionsAndSubActionsForDay(day.date).length > 3" 
+             class="text-xs text-gray-500 text-center mt-1">
+          +{{ getActionsAndSubActionsForDay(day.date).length - 3 }} more
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Actions Template -->
+  <ng-template #noActions>
+    <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+      <i class="fas fa-inbox text-4xl mb-4"></i>
+      <h3 class="text-lg font-medium">No actions found</h3>
+      <p>Try adjusting filters or add new actions.</p>
+    </div>
+  </ng-template>
+</div>
+
+<!-- Corrective Action Modal -->
+<app-corrective-action-modal
+  [show]="showCorrectiveActionModal"
+  [isLoading]="correctiveActionLoading"
+  [error]="correctiveActionError"
+  [priorityOptions]="priorityOptions"
+  [hierarchyOptions]="hierarchyOptions"
+  (closeModal)="onCloseCorrectiveActionModal()"
+  (submitForm)="onSubmitCorrectiveAction($event)">
+</app-corrective-action-modal>
+
+<!-- Sub-Action Modal -->
+<app-sub-action-modal
+  [show]="showSubActionModal"
+  [isLoading]="correctiveActionLoading || usersLoading"
+  [action]="getParentActionForModal()"
+  [mode]="'create'"
+  [allUsers]="allUsers"
+  [statusOptions]="['Not Started', 'In Progress', 'Completed', 'On Hold', 'Canceled']"
+  (closeModal)="onCloseSubActionModal()"
+  (submitForm)="onSubmitSubAction($event)">
+</app-sub-action-modal>
+
+<!-- Alert Container -->
+<app-alert-container></app-alert-container>
+
+<!-- Confirmation Dialog -->
+<app-confirmation-dialog
+  [isOpen]="confirmationDialog.show"
+  [title]="confirmationDialog.title"
+  [message]="confirmationDialog.message"
+  [confirmText]="confirmationDialog.confirmText"
+  [cancelText]="confirmationDialog.cancelText"
+  [icon]="confirmationDialog.type"
+  (confirm)="confirmationDialog.onConfirm()"
+  (cancel)="onCloseConfirmation()">
+</app-confirmation-dialog>
+
+<!-- Abort Reason Modal -->
+<div *ngIf="showAbortModal" class="abort-message-overlay" (click)="onCloseAbortModal()">
+  <div class="abort-message-content" (click)="$event.stopPropagation()">
+    <div class="abort-message-header">
+      <div class="abort-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3 class="abort-title">Abort Action</h3>
+    </div>
+    
+    <p class="abort-description">
+      Are you sure you want to abort the action "<strong>{{ selectedActionToAbort?.title }}</strong>"? 
+      This action cannot be undone and all related sub-actions will be canceled.
+    </p>
+    
+    <div class="abort-reason-box">
+      <div class="abort-reason-label">Reason for Abortion:</div>
+      <textarea 
+        [(ngModel)]="abortReason"
+        placeholder="Please provide a detailed reason for aborting this action..."
+        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+        rows="3"
+        maxlength="500">
+      </textarea>
+      <div class="text-sm text-gray-500 mt-2">{{ abortReason.length }}/500 characters</div>
+    </div>
+    
+    <div class="abort-actions">
+      <button 
+        type="button"
+        (click)="onCloseAbortModal()"
+        class="abort-btn abort-btn-cancel">
+        Cancel
+      </button>
+      <button 
+        type="button"
+        (click)="onConfirmAbort()"
+        [disabled]="!abortReason.trim()"
+        class="abort-btn abort-btn-confirm"
+        [class.opacity-50]="!abortReason.trim()"
+        [class.cursor-not-allowed]="!abortReason.trim()">
+        <i class="fas fa-times mr-2"></i>
+        Abort Action
+      </button>
+    </div>
+  </div>
+</div>

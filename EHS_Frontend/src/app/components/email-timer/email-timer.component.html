@@ -1,0 +1,127 @@
+<div class="email-timers-container">
+  <div class="timers-header">
+    <h3 class="timers-title">
+      <i class="fas fa-clock"></i>
+      Next Email Schedule
+    </h3>
+    <button class="refresh-btn" (click)="refreshTimers()" title="Refresh timers">
+      <i class="fas fa-sync-alt"></i>
+    </button>
+  </div>
+
+  <div class="timers-row">
+    <!-- HSE Email Timer -->
+    <div class="timer-card" [class.disabled]="!nextEmails.hseEmail?.isEnabled">
+      <div class="timer-header">
+        <div class="timer-label">
+          <i class="fas fa-user-shield"></i>
+          HSE Updates
+        </div>
+        <div class="timer-interval" *ngIf="nextEmails.hseEmail">
+          {{ getIntervalDisplay(nextEmails.hseEmail) }}
+        </div>
+      </div>
+      
+      <div class="timer-circle">
+        <svg class="progress-ring" width="120" height="120">
+          <circle
+            class="progress-ring-background"
+            stroke="#e0e0e0"
+            stroke-width="8"
+            fill="transparent"
+            r="52"
+            cx="60"
+            cy="60"/>
+          <circle
+            class="progress-ring-progress hse-progress"
+            stroke="#4CAF50"
+            stroke-width="8"
+            fill="transparent"
+            r="52"
+            cx="60"
+            cy="60"
+            [style.stroke-dasharray]="326.73"
+            [style.stroke-dashoffset]="nextEmails.hseEmail ? 326.73 - (326.73 * getProgressPercentage(nextEmails.hseEmail) / 100) : 326.73"
+            stroke-linecap="round"/>
+        </svg>
+        
+        <div class="timer-content">
+          <div class="time-remaining" *ngIf="nextEmails.hseEmail; else noHseTimer">
+            {{ getTimeDisplay(nextEmails.hseEmail) }}
+          </div>
+          <ng-template #noHseTimer>
+            <div class="time-remaining disabled-text">
+              Disabled
+            </div>
+          </ng-template>
+          <div class="timer-status">
+            {{ nextEmails.hseEmail?.isEnabled ? 'until next' : 'Not active' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="timer-details" *ngIf="nextEmails.hseEmail?.lastSentTime">
+        <small class="last-sent">
+          Last sent: {{ nextEmails.hseEmail?.lastSentTime | date:'short' }}
+        </small>
+      </div>
+    </div>
+
+    <!-- Admin Email Timer -->
+    <div class="timer-card" [class.disabled]="!nextEmails.adminEmail?.isEnabled">
+      <div class="timer-header">
+        <div class="timer-label">
+          <i class="fas fa-user-cog"></i>
+          Admin Overview
+        </div>
+        <div class="timer-interval" *ngIf="nextEmails.adminEmail">
+          {{ getIntervalDisplay(nextEmails.adminEmail) }}
+        </div>
+      </div>
+      
+      <div class="timer-circle">
+        <svg class="progress-ring" width="120" height="120">
+          <circle
+            class="progress-ring-background"
+            stroke="#e0e0e0"
+            stroke-width="8"
+            fill="transparent"
+            r="52"
+            cx="60"
+            cy="60"/>
+          <circle
+            class="progress-ring-progress admin-progress"
+            stroke="#FF9800"
+            stroke-width="8"
+            fill="transparent"
+            r="52"
+            cx="60"
+            cy="60"
+            [style.stroke-dasharray]="326.73"
+            [style.stroke-dashoffset]="nextEmails.adminEmail ? 326.73 - (326.73 * getProgressPercentage(nextEmails.adminEmail) / 100) : 326.73"
+            stroke-linecap="round"/>
+        </svg>
+        
+        <div class="timer-content">
+          <div class="time-remaining" *ngIf="nextEmails.adminEmail; else noAdminTimer">
+            {{ getTimeDisplay(nextEmails.adminEmail) }}
+          </div>
+          <ng-template #noAdminTimer>
+            <div class="time-remaining disabled-text">
+              Disabled
+            </div>
+          </ng-template>
+          <div class="timer-status">
+            {{ nextEmails.adminEmail?.isEnabled ? 'until next' : 'Not active' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="timer-details" *ngIf="nextEmails.adminEmail?.lastSentTime">
+        <small class="last-sent">
+          Last sent: {{ nextEmails.adminEmail?.lastSentTime | date:'short' }}
+        </small>
+      </div>
+    </div>
+  </div>
+</div>

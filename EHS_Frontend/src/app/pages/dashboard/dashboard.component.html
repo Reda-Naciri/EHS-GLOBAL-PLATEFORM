@@ -1,0 +1,157 @@
+<div class="dashboard-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex items-center justify-center h-64">
+    <div class="text-lg">Loading dashboard...</div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="flex items-center justify-center h-64">
+    <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg shadow-lg max-w-md">
+      <div class="flex items-center">
+        <i class="fas fa-exclamation-triangle text-red-500 mr-4 text-2xl"></i>
+        <div>
+          <h3 class="text-red-800 font-medium text-lg">Error Loading Dashboard</h3>
+          <p class="text-red-700 mt-1">{{ error }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="dashboard-content" *ngIf="!loading && !error">
+    
+    
+
+    <!-- Main Section (Left: Reports & KPIs | Right: Recent Reports) -->
+    <div class="dashboard-body">
+      <!-- 🔹 LEFT SECTION (Reports, Incident Management & KPIs) -->
+      <div class="dashboard-left">
+        <!-- Section for Reports & Incident Management -->
+        <div class="cards-container">
+          <div class="dashboard-card reports-card" routerLink="/reports">
+            <div class="card-header">
+              <div class="card-icon">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <h3 class="card-title">{{ isHSEUser() ? 'My Safety Reports' : 'Safety Reports' }}</h3>
+            </div>
+            <div class="incident-count">{{ totalNonIncidentReports }}</div>
+            <div class="card-subtitle">{{ safetyReportsPercentage }}% of Total Reports</div>
+          </div>
+          <!-- Incident Management Card -->
+          <div class="dashboard-card incident-card" routerLink="/incident-dashboard">
+            <div class="card-header">
+              <div class="card-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <h3 class="card-title">{{ isHSEUser() ? 'My Incidents' : 'Incident Management' }}</h3>
+            </div>
+            <div class="incident-count">{{ incidentManagementCount }}</div>
+            <div class="card-subtitle">{{ incidentReportsPercentage }}% of Total Reports</div>
+          </div>
+        </div>
+        
+        <!-- Statistics Indicators -->
+        <div class="statistics-indicators">
+          <h3 class="indicators-title">Key Performance Indicators</h3>
+          <div class="indicators-grid">
+            
+            <!-- Total Reports Indicator -->
+            <div class="indicator-card total-reports"  title="View all reports">
+              <div class="indicator-icon">
+                <i class="fas fa-file-alt"></i>
+              </div>
+              <div class="indicator-content">
+                <div class="indicator-number">{{ totalReports }}</div>
+                <div class="indicator-label">{{ isHSEUser() ? 'My Total Reports' : 'Total Reports' }}</div>
+                <div class="indicator-trend positive">
+                </div>
+              </div>
+            </div>
+
+            <!-- Unopened Reports Indicator -->
+            <div class="indicator-card unopened-reports"  title="View unopened reports">
+              <div class="indicator-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="indicator-content">
+                <div class="indicator-number">{{ openReports }}</div>
+                <div class="indicator-label">{{ isHSEUser() ? 'My Unopened Reports' : 'Unopened Reports' }}</div>
+                <div class="indicator-trend" [class.warning]="openReports > 0">
+                </div>
+              </div>
+            </div>
+
+            <!-- Closed Reports Indicator -->
+            <div class="indicator-card closed-reports"  title="View closed reports">
+              <div class="indicator-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <div class="indicator-content">
+                <div class="indicator-number">{{ closedReports }}</div>
+                <div class="indicator-label">{{ isHSEUser() ? 'My Closed Reports' : 'Closed Reports' }}</div>
+                <div class="indicator-trend positive">
+                </div>
+              </div>
+            </div>
+
+            <!-- Total Actions Indicator -->
+            <div class="indicator-card total-actions" routerLink="/actions" title="View all actions">
+              <div class="indicator-icon">
+                <i class="fas fa-tasks"></i>
+              </div>
+              <div class="indicator-content">
+                <div class="indicator-number">{{ totalActions }}</div>
+                <div class="indicator-label">{{ isAdmin() ? 'Total Actions' : 'My Actions' }}</div>
+                <div class="indicator-trend neutral">
+                  <i class="fas fa-cog"></i>
+                  <span>{{ completedActions }} completed</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        
+        <!-- KPI Placeholder (Power BI to be added later) -->
+        <div class="kpi-placeholder">
+          <img src="https://hsefiles.com/wp-content/uploads/2022/03/HSE-KPI-Dashboard-New.jpg" alt="KPI Placeholder">
+        </div>
+      </div>
+
+      <div class="dashboard-right">
+        <h2 class="text-lg font-bold mb-4">Recent Reports</h2>
+        <div class="reports-container space-y-4">
+          <div *ngFor="let report of displayedReports" 
+               class="report-card flex gap-4 items-start" 
+               [routerLink]="['/reports', report.id]" 
+               title="Click to view report details"
+               role="button"
+               tabindex="0">
+            <span class="report-icon text-2xl">{{ getIcon(report.type) }}</span>
+            <div class="report-info flex-1">
+              <p><strong>{{ report.title }}</strong></p>
+              <p class="subtext text-sm text-gray-500">
+                By {{ getReporterName(report) }} · {{ report.createdAt | date: 'dd/MM/yyyy' }}
+              </p>
+              <p *ngIf="isAdmin() && report.assignedHSE" class="text-xs text-blue-600 mt-1">
+                HSE Agent: {{ getHSEAgent(report) }}
+              </p>
+              <p *ngIf="isAdmin() && !report.assignedHSE" class="text-xs text-orange-600 mt-1">
+                HSE Agent: Unassigned
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Voir Plus / Voir Moins -->
+        <div class="mt-4 text-center">
+          <button class="text-blue-600 hover:underline font-medium" (click)="toggleShowMore()">
+            {{ showAllReports ? 'See Less' : 'See More' }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

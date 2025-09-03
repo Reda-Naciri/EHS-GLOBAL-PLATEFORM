@@ -1,0 +1,296 @@
+<div class="reports-wrapper">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <span class="ml-3 text-gray-600">Loading reports...</span>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="flex items-center">
+      <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+      <span class="text-red-700">{{ error }}</span>
+      <button (click)="refreshReports()" class="ml-auto px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition">
+        <i class="fas fa-redo mr-1"></i> Retry
+      </button>
+    </div>
+  </div>
+
+  
+
+  <!-- KPI Section -->
+  <section class="mb-8" *ngIf="!loading">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4">Key Performance Indicators</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedType === 'Hasard'"
+           [class.ring-red-500]="selectedType === 'Hasard'"
+           (click)="toggleTypeFilter('Hasard')">
+        <div class="text-3xl font-bold text-red-500">{{ getTypeCount('Hasard') }}</div>
+        <div class="text-gray-700 font-medium">Hazard Situations</div>
+        <div class="mt-2 h-2 bg-gray-200 rounded-full">
+          <div class="h-2 bg-red-500 rounded-full" [style.width.%]="getTypePercentage('Hasard')"></div>
+        </div>
+      </div>
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedType === 'Nearhit'"
+           [class.ring-yellow-500]="selectedType === 'Nearhit'"
+           (click)="toggleTypeFilter('Nearhit')">
+        <div class="text-3xl font-bold text-yellow-500">{{ getTypeCount('Nearhit') }}</div>
+        <div class="text-gray-700 font-medium">Near Hits</div>
+        <div class="mt-2 h-2 bg-gray-200 rounded-full">
+          <div class="h-2 bg-yellow-500 rounded-full" [style.width.%]="getTypePercentage('Nearhit')"></div>
+        </div>
+      </div>
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedType === 'Enviroment-aspect'"
+           [class.ring-green-500]="selectedType === 'Enviroment-aspect'"
+           (click)="toggleTypeFilter('Enviroment-aspect')">
+        <div class="text-3xl font-bold text-green-500">{{ getTypeCount('Enviroment-aspect') }}</div>
+        <div class="text-gray-700 font-medium">Environmental Aspects</div>
+        <div class="mt-2 h-2 bg-gray-200 rounded-full">
+          <div class="h-2 bg-green-500 rounded-full" [style.width.%]="getTypePercentage('Enviroment-aspect')"></div>
+        </div>
+      </div>
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedType === 'Improvement-Idea'"
+           [class.ring-purple-500]="selectedType === 'Improvement-Idea'"
+           (click)="toggleTypeFilter('Improvement-Idea')">
+        <div class="text-3xl font-bold text-purple-500">{{ getTypeCount('Improvement-Idea') }}</div>
+        <div class="text-gray-700 font-medium">Improvement Ideas</div>
+        <div class="mt-2 h-2 bg-gray-200 rounded-full">
+          <div class="h-2 bg-purple-500 rounded-full" [style.width.%]="getTypePercentage('Improvement-Idea')"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedStatus === 'Unopened'"
+           [class.ring-gray-500]="selectedStatus === 'Unopened'"
+           (click)="toggleStatusFilter('Unopened')">
+        <div class="text-3xl font-bold text-gray-600">{{ getStatusCount('Unopened') }}</div>
+        <div class="text-gray-700 font-medium">Unopened</div>
+      </div>
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedStatus === 'Opened'"
+           [class.ring-yellow-500]="selectedStatus === 'Opened'"
+           (click)="toggleStatusFilter('Opened')">
+        <div class="text-3xl font-bold text-yellow-500">{{ getStatusCount('Opened') }}</div>
+        <div class="text-gray-700 font-medium">Opened</div>
+      </div>
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedStatus === 'Closed'"
+           [class.ring-green-500]="selectedStatus === 'Closed'"
+           (click)="toggleStatusFilter('Closed')">
+        <div class="text-3xl font-bold text-green-500">{{ getStatusCount('Closed') }}</div>
+        <div class="text-gray-700 font-medium">Closed</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HSE Filter Section (Admin Only) -->
+  <section class="mb-6" *ngIf="isAdmin() && hseAgents.length > 0 && !loading">
+    <h3 class="text-lg font-semibold text-gray-700 mb-3">Filter by HSE Agent</h3>
+    <div class="flex flex-wrap gap-2">
+      <button 
+        class="px-3 py-2 rounded-lg border transition text-sm"
+        [class]="selectedHSE === null ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+        (click)="toggleHSEFilter('')">
+        All HSE Agents ({{ allReports.length }})
+      </button>
+      <button 
+        *ngFor="let hse of hseAgents"
+        class="px-3 py-2 rounded-lg border transition text-sm"
+        [class]="selectedHSE === hse ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+        (click)="toggleHSEFilter(hse)">
+        {{ hse }} ({{ getHSEReportCount(hse) }})
+      </button>
+    </div>
+  </section>
+
+  <!-- HSE Reports Toggle (HSE Users Only) -->
+  <section class="mb-6" *ngIf="isHSEUser() && !loading">
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold text-blue-800 mb-1">Reports View</h3>
+          <p class="text-sm text-blue-600">
+            <span *ngIf="showAssignedOnly">Showing reports assigned to you ({{ assignedReports.length }})</span>
+            <span *ngIf="!showAssignedOnly">Showing opened team reports</span>
+          </p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="text-sm font-medium text-blue-700" 
+                [class.text-blue-900]="showAssignedOnly">My Assigned</span>
+          <button
+            (click)="toggleReportsView()"
+            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            [class.bg-blue-600]="!showAssignedOnly"
+            [class.bg-gray-300]="showAssignedOnly">
+            <span class="sr-only">Toggle reports view</span>
+            <span
+              class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+              [class.translate-x-6]="!showAssignedOnly"
+              [class.translate-x-1]="showAssignedOnly">
+            </span>
+          </button>
+          <span class="text-sm font-medium text-blue-700" 
+                [class.text-blue-900]="!showAssignedOnly">Team Opened</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search and Filter Section -->
+  <div class="mb-6" *ngIf="!loading">
+    <div class="flex flex-col md:flex-row gap-4">
+      <!-- Search Bar -->
+      <div class="flex-1">
+        <input type="text"
+               placeholder="Search reports by title, zone, type, status, reporter, or HSE agent..."
+               [(ngModel)]="searchQuery"
+               (input)="onSearchChange()"
+               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-300" />
+      </div>
+      
+      <!-- Clear Filters Button -->
+      <button 
+        *ngIf="selectedType || selectedStatus || selectedHSE || searchQuery"
+        (click)="clearFilters()"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center">
+        <i class="fas fa-times mr-2"></i> Clear Filters
+      </button>
+    </div>
+    
+    <!-- Active Filters Display -->
+    <div class="mt-3 flex flex-wrap gap-2" *ngIf="selectedType || selectedStatus || selectedHSE">
+      <span class="text-sm text-gray-600">Active filters:</span>
+      <span *ngIf="selectedType" class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+        Type: {{ selectedType }}
+      </span>
+      <span *ngIf="selectedStatus" class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+        Status: {{ selectedStatus }}
+      </span>
+      <span *ngIf="selectedHSE" class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+        HSE: {{ selectedHSE }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Results Summary -->
+  <div class="mb-4" *ngIf="!loading">
+    <p class="text-sm text-gray-600">
+      Showing {{ filteredReports.length }} of {{ allReports.length }} reports
+    </p>
+  </div>
+
+  <!-- No Results Message -->
+  <div *ngIf="!loading && filteredReports.length === 0" class="text-center py-8">
+    <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+    <h3 class="text-lg font-medium text-gray-600 mb-2">No reports found</h3>
+    <p class="text-gray-500">Try adjusting your search criteria or filters.</p>
+    <button (click)="clearFilters()" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+      Clear all filters
+    </button>
+  </div>
+
+  <!-- 📋 Liste filtrée des rapports -->
+  <div *ngFor="let report of filteredReports" class="report-card" [ngClass]="getTypeClass(report.type)">
+    <div class="report-header" (click)="toggle(report)">
+      <div class="report-header-left">
+        <span class="report-icon">{{ report.icon }}</span>
+        <div>
+          <h3 class="report-title">
+            {{ report.title }}
+            <span [ngClass]="getStatusClass(report.status)" class="status-badge">
+              {{ report.status }}
+            </span>
+          </h3>
+          <p class="report-meta">
+            🗓️ {{ report.createdAt | date: 'dd/MM/yyyy HH:mm' }} - 👤 {{ report.author }}
+            <span *ngIf="report.assignedHSE" class="ml-2 text-blue-600 font-medium">
+              📋 HSE: {{ report.assignedHSE }}
+            </span>
+            <span *ngIf="!report.assignedHSE" class="ml-2 text-gray-500 font-medium">
+              📋 HSE: Unassigned
+            </span>
+          </p>
+        </div>
+      </div>
+      <i [ngClass]="{
+           'fa-chevron-down': !report.expanded,
+           'fa-chevron-up': report.expanded
+         }" class="fa-solid report-toggle-icon"></i>
+    </div>
+
+    <div *ngIf="report.expanded" class="report-details">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p><strong>📍 Zone:</strong> {{ report.zone }}</p>
+          <p><strong>📝 Type:</strong> {{ report.type }}</p>
+          <p *ngIf="report.injuredPersonsCount > 0" class="text-red-600">
+            <strong>🩹 Injured Persons:</strong> {{ report.injuredPersonsCount }}
+          </p>
+        </div>
+        <div>
+          <p><strong>📋 Assigned HSE:</strong> 
+            <span *ngIf="report.assignedHSE" class="text-blue-600">{{ report.assignedHSE }}</span>
+            <span *ngIf="!report.assignedHSE" class="text-gray-500">Unassigned</span>
+          </p>
+          <p *ngIf="report.injurySeverity"><strong>⚠️ Severity:</strong> {{ report.injurySeverity }}</p>
+          <p><strong>📎 Corrective Actions:</strong> {{ report.correctiveActionsCount || 0 }}</p>
+        </div>
+      </div>
+      <div class="flex space-x-2">
+        <button [routerLink]="['/reports', report.trackingNumber]" class="view-more-btn">
+          <i class="fas fa-eye mr-1"></i> View Details
+        </button>
+        
+        
+        <!-- HSE Assignment Button (Admin Only) -->
+        <div *ngIf="isAdmin()" class="relative inline-block">
+          <button 
+            (click)="toggleAssignmentDropdown(report.id)"
+            class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm flex items-center">
+            <i class="fas fa-user-cog mr-1"></i> 
+            Assign HSE
+            <i class="fas fa-chevron-down ml-1"></i>
+          </button>
+          
+          <!-- HSE Assignment Dropdown -->
+          <div *ngIf="showingAssignmentDropdown === report.id" 
+               class="absolute left-0 mt-1 w-64 bg-white border border-gray-300 rounded-md shadow-lg z-50">
+            <div class="py-1 max-h-48 overflow-y-auto">
+              <!-- Current Assignment Display -->
+              <div class="px-3 py-2 border-b border-gray-200 bg-gray-50 text-sm font-medium text-gray-700">
+                Current: {{ getAssignedHSEName(report) }}
+              </div>
+              
+              <!-- Unassign Option -->
+              <button 
+                (click)="assignHSEAgent(report.id, null)"
+                class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center">
+                <i class="fas fa-user-slash mr-2 text-gray-500"></i>
+                <span class="text-gray-700">Unassign</span>
+              </button>
+              
+              <!-- HSE Users List -->
+              <button 
+                *ngFor="let hseUser of hseUsers"
+                (click)="assignHSEAgent(report.id, hseUser.id)"
+                class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center"
+                [class.bg-blue-50]="report.assignedHSE === hseUser.name">
+                <i class="fas fa-user mr-2 text-blue-600"></i>
+                <div>
+                  <div class="font-medium text-gray-900">{{ hseUser.name }}</div>
+                  <div class="text-xs text-gray-500">{{ hseUser.email }}</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

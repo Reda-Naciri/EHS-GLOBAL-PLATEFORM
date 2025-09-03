@@ -1,0 +1,241 @@
+<div class="min-h-screen flex flex-col items-center bg-gradient-to-br from-[#e2e2e2] to-[#ECECEC] py-10 relative overflow-hidden">
+  <!-- Header Section -->
+  <div class="w-full py-6 flex justify-center">
+    <img src="https://www.fclane.com/sites/default/files/partner_logos/polamcote-logo2.png"
+         alt="TE Connectivity Logo" class="h-24 md:h-32 lg:h-40">
+  </div>
+
+  <!-- Main Content Container -->
+  <div class="container mx-auto bg-white shadow-xl rounded-lg p-8 w-full max-w-4xl">
+
+    <!-- Title Section -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6 rounded-md mb-8">
+      <div class="flex items-center">
+        <i class="fas fa-clipboard-check text-4xl mr-4"></i>
+        <div>
+          <h1 class="text-3xl font-bold">{{ reportTitle }}</h1>
+          <p class="opacity-90 mt-1">Comprehensive reporting for workplace</p>
+        </div>
+      </div>
+    </div>
+
+    <form class="space-y-6" #incidentForm="ngForm">
+      <!-- Reporter Information -->
+      <div class="bg-blue-50 p-5 rounded-lg border border-blue-100">
+        <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center">
+          <i class="fas fa-user-circle mr-3"></i>Reporter Information
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Reporter ID*</label>
+            <input type="text" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Work Shift*</label>
+            <select required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+              <option value="">Day</option>
+              <option>Afternoon</option>
+              <option>Night</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Incident Details -->
+      <div class="bg-yellow-50 p-5 rounded-lg border border-yellow-100">
+        <h2 class="text-xl font-semibold text-yellow-800 mb-4 flex items-center">
+          <i class="fas fa-exclamation-triangle mr-3"></i>Details
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Title*</label>
+            <input type="text" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Zone</label>
+            <select required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+              <option value="">Select zone</option>
+              <option>Production Area A</option>
+              <option>Warehouse B</option>
+              <option>Office Building</option>
+              <option>Parking Lot</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time*</label>
+            <input type="datetime-local" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description*</label>
+          <textarea rows="4" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Attachment</label>
+          <input type="file" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+        </div>
+      </div>
+
+      <!-- Injured Persons (only for Incident Management Report) -->
+      <div *ngIf="reportType === 'Incident-Management'" class="bg-red-50 p-5 rounded-lg border border-red-100">
+        <h2 class="text-xl font-semibold text-red-800 mb-4 flex items-center">
+          <i class="fas fa-user-injured mr-3"></i>Injured Persons
+        </h2>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Number of Injured Persons*</label>
+          <select name="injuredCount"
+                  [(ngModel)]="injuredCount"
+                  (change)="onInjuredCountChange(injuredCount)"
+                  class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+
+        </div>
+
+        <div *ngFor="let person of injuredPersons; let i = index" class="bg-white p-5 rounded-lg border border-red-200 mb-6">
+          <h3 class="font-medium text-lg text-red-700 mb-4">Injured Person #{{ i + 1 }}</h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Name*</label>
+              <input [(ngModel)]="person.name" name="name{{i}}" type="text" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Departement</label>
+              <input [(ngModel)]="person.age" name="age{{i}}" type="number" min="0" max="120" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Zone of Person</label>
+              <select required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                <option value="">Select zone</option>
+                <option>Production Area A</option>
+                <option>Warehouse B</option>
+                <option>Office Building</option>
+                <option>Parking Lot</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+              <select [(ngModel)]="person.gender" name="gender{{i}}" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+                <option value="Prefer not to say">Prefer not to say</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bg-white border border-gray-300 shadow-md rounded-lg p-4 my-6 w-full max-w-3xl mx-auto">
+
+            <!-- Titre -->
+            <h2 class="text-lg font-semibold mb-0 text-center text-blue-800">Select Injured Body Part</h2>
+
+            <!-- CORPS -->
+            <div class="flex justify-center" style="height: 300px; position: relative;">
+              <div style="transform: scale(0.8); transform-origin: top center; width: 100%; height: 100%;">
+                <app-body-map (bodyPartSelected)="person.selectedBodyPart = $event"></app-body-map>
+              </div>
+            </div>
+
+            <!-- Texte Selected -->
+            <div class="mt-1 text-center text-gray-700 text-sm">
+              Selected: <span class="font-semibold">{{ person.selectedBodyPart || 'None' }}</span>
+            </div>
+
+          </div>
+
+
+          <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Injury Type</label>
+              <input [(ngModel)]="person.injuryType" name="injuryType{{i}}" type="text" placeholder="Fracture, Burn, etc." class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Severity</label>
+              <select [(ngModel)]="person.severity" name="severity{{i}}" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                <option value="">Select severity</option>
+                <option value="low">Minor</option>
+                <option value="medium">Moderate</option>
+                <option value="high">Severe</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea [(ngModel)]="person.description" name="description{{i}}" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+
+          <div class="mt-4 flex justify-end">
+            <button type="button" (click)="addInjury(i)" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium">
+              <i class="fas fa-plus mr-2"></i>Add Injury
+            </button>
+          </div>
+
+          <div *ngIf="person.injuries.length > 0" class="mt-4">
+            <h4 class="font-semibold mb-2">Documented Injuries:</h4>
+            <ul class="list-disc ml-6 space-y-1">
+              <li *ngFor="let injury of person.injuries">
+                {{ injury.bodyPart }} - {{ injury.severity | titlecase }} - {{ injury.description }}
+                <button type="button" (click)="removeInjury(i, injury.id)" class="text-red-600 ml-2 hover:underline">Remove</button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions Taken -->
+      <div class="bg-green-50 p-5 rounded-lg border border-green-100">
+        <h2 class="text-xl font-semibold text-green-800 mb-4 flex items-center">
+          <i class="fas fa-tasks mr-3"></i>Actions Taken
+        </h2>
+
+        <div class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Immediate Actions Taken*</label>
+            <textarea rows="3" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Action Status</label>
+            <select class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+              <option>Non commencé</option>
+              <option>En cours</option>
+              <option>Terminé</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Person in Charge of Actions*</label>
+              <input type="text" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Date Actions Completed</label>
+              <input type="date" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Submission -->
+      <div class="flex justify-end gap-4 pt-4">
+        <button type="button" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium">
+          <i class="fas fa-redo mr-2"></i>Reset
+        </button>
+        <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+          <i class="fas fa-paper-plane mr-2"></i>Submit Report
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

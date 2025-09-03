@@ -1,0 +1,306 @@
+/* Container setup */
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  background: #f5f5f5;
+
+}
+
+
+/* Main Content */
+.dashboard-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0px;
+  margin-left: 0px;
+  margin-top: -20px;
+  padding-bottom: 80px;
+}
+
+
+/* Profile Section */
+.profile {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+  .profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+  }
+
+  .profile span {
+    font-weight: bold;
+    color: black;
+  }
+
+  .profile i {
+    font-size: 14px;
+    color: black;
+  }
+
+.absolute {
+  position: absolute;
+  z-index: 50;
+  right: 0;
+  top: 100%;
+  margin-top: 5px;
+}
+
+.bg-white {
+  background: white;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rounded-lg {
+  border-radius: 8px;
+}
+
+.logout-button {
+  color: red;
+  font-weight: bold;
+}
+
+  .logout-button:hover {
+    color: darkred;
+  }
+
+/* Users Table */
+.content {
+  padding: 20px;
+  background: #f5f5f5;
+  margin-top: calc(80px + 10px);
+}
+
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px; /* ✅ Adds space between search input and button */
+  margin-bottom: 20px;
+}
+
+  /* ✅ Add spacing for input field */
+  .user-header input {
+    flex: 1; /* ✅ Takes up available space */
+    padding: 10px;
+    height: 42px; /* ✅ Set fixed height */
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  /* ✅ "Add User" Button */
+  .user-header button {
+    height: 42px; /* ✅ Matches input height */
+    padding: 0 20px;
+    font-size: 16px;
+    background-color: #1a73e8; /* ✅ Vibrant blue */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+    .user-header button:hover {
+      background-color: #1558b6; /* ✅ Darker shade on hover */
+    }
+
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+  .table th, .table td {
+    padding: 10px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .table th {
+    background: #edf2f7;
+    font-weight: bold;
+  }
+
+.button {
+  border-radius: 5px;
+}
+
+.button-edit {
+  color: white;
+  cursor: pointer;
+}
+
+.button-delete {
+  color: white;
+  cursor: pointer;
+}
+
+@media screen and (min-width: 768px) {
+
+  .hamburger {
+    display: none;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar-overlay {
+    display: none;
+  }
+
+  .sidebar {
+    width: 250px;
+    transform: translateX(-100%);
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+  }
+
+    .sidebar.open {
+      transform: translateX(0);
+    }
+
+  .hamburger {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    display: block;
+    position: fixed;
+    top: 11px;
+    left: 20px;
+    z-index: 1001;
+    color: black;
+  }
+
+  .dashboard-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    left: 0;
+    width: 100%;
+    top: 0;
+    z-index: 999;
+    background: white;
+  }
+
+  .header-left {
+    margin-left: 60px;
+  }
+
+  .profile span {
+    display: none;
+  }
+
+  .profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 0;
+  }
+
+  .dashboard-content {
+    margin-left: -140px;
+    width: 100vw;
+    height: 100vh;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .content {
+    padding: 10px;
+    position: relative;
+    top: 80px; /* Ensures content stays below header */
+    margin-top: 0px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Avoid shifting when data changes */
+  }
+
+  .user-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+  }
+
+    .user-header input {
+      width: 75%;
+      flex: none;
+    }
+
+    .user-header button {
+      width: 25%;
+      flex: none;
+    }
+
+  .table-container {
+    width: 100%;
+    flex-grow: 1;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    display: block;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  /* ✅ Hides Email and Role columns */
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  .table th, .table td {
+    padding: 8px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .table th {
+    background: #edf2f7;
+    font-weight: bold;
+  }
+
+  .table td {
+    white-space: nowrap;
+  }
+
+  /* ✅ Stack Edit/Delete buttons vertically */
+  .action-buttons {
+    display: flex;
+    flex-direction: column !important;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .table-responsive {
+    display: block;
+    width: 100%;
+  }
+}
+

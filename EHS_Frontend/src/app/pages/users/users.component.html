@@ -1,0 +1,528 @@
+<div class="container mx-auto px-4 py-8 mt-20">
+      
+      <!-- Access Denied Message -->
+      <div *ngIf="accessDenied" class="bg-red-50 border border-red-200 rounded-lg p-6 mb-8 max-w-2xl mx-auto mt-8">
+        <div class="flex items-center">
+          <i class="fas fa-exclamation-triangle text-red-500 mr-3 text-xl"></i>
+          <div>
+            <h2 class="text-red-800 font-semibold text-lg">Access Denied</h2>
+            <p class="text-red-700 mt-1">{{ accessDeniedMessage }}</p>
+            <p class="text-red-600 text-sm mt-2">You will be redirected to the dashboard shortly...</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Toggle Buttons -->
+      <div *ngIf="!accessDenied" class="flex justify-center mb-8">
+        <div class="bg-white rounded-lg p-1 shadow-md inline-flex">
+          <button 
+            (click)="switchToUsersTable()"
+            [class]="isUsersTab() ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'"
+            class="flex-1 px-6 py-3 rounded-md font-medium transition-all duration-200 text-sm whitespace-nowrap min-w-0">
+            <i class="fas fa-users mr-2"></i>Users Management
+          </button>
+          <button 
+            (click)="switchToRequestsTable()"
+            [class]="isRequestsTab() ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'"
+            class="flex-1 px-6 py-3 rounded-md font-medium transition-all duration-200 text-sm whitespace-nowrap min-w-0 ml-1 relative">
+            <i class="fas fa-user-plus mr-2"></i>User Requests
+            <span *ngIf="pendingRequestsCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-2 py-1 font-bold">{{ pendingRequestsCount }}</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Page Header -->
+
+      <!-- Users Table Section -->
+      <div *ngIf="isUsersTab() && !accessDenied" class="mb-16">
+        <!-- Filter Section -->
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+        <h3 class="text-lg font-medium text-gray-800 mb-4">Filters</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <!-- Search -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+            <input 
+              type="text" 
+              placeholder="Search users..." 
+              [(ngModel)]="searchQuery"
+              (input)="onSearchChange()"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          
+          <!-- Role Filter -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+            <select 
+              [(ngModel)]="selectedRole"
+              (change)="applyFilters()"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">All Roles</option>
+              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+            </select>
+          </div>
+          
+          <!-- Department Filter -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+            <select 
+              [(ngModel)]="selectedDepartment"
+              (change)="applyFilters()"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">All Departments</option>
+              <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+            </select>
+          </div>
+          
+          <!-- Actions -->
+          <div class="sm:col-span-2 lg:col-span-1 xl:col-span-1 flex flex-col sm:flex-row sm:items-end space-y-2 sm:space-y-0 sm:space-x-2">
+            <button 
+              (click)="applyFilters()"
+              class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm">
+              Apply Filters
+            </button>
+            <button 
+              (click)="clearFilters()"
+              class="w-full sm:w-auto px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition text-sm">
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="bg-white rounded-lg shadow-md p-8 text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p class="text-gray-600">Loading users...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error && !loading" class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex items-center">
+            <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+            <span class="text-red-700">{{ error }}</span>
+            <button (click)="refreshUsers()" class="ml-auto px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Table -->
+      <div *ngIf="!loading && !error" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <!-- Table Header Actions -->
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+          <div class="text-sm text-gray-600">
+            Showing {{ users.length }} of {{ totalCount }} users
+          </div>
+          <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            <button 
+              (click)="refreshUserStatus()" 
+              class="w-full sm:w-auto px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
+              title="Refresh user status">
+              <i class="fas fa-sync-alt mr-1"></i>Refresh
+            </button>
+            <button 
+              (click)="openUserModal()" 
+              class="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-sm">
+              <i class="fas fa-plus mr-2"></i>Add User
+            </button>
+          </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Avatar
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name & ID
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email & Position
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Department
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Role
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let user of paginatedUsers" 
+                  [class]="'hover:bg-gray-50 ' + (isCurrentUser(user) ? 'bg-blue-50 border-l-4 border-l-blue-500' : '')">
+                <!-- Avatar Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="relative">
+                      
+                      <img *ngIf="getAvatarUrl(user); else defaultAvatar"
+                           [src]="getAvatarUrl(user)"
+                           [alt]="user.fullName + ' avatar'"
+                           class="h-10 w-10 rounded-full object-cover ring-2 ring-gray-200">
+                      <ng-template #defaultAvatar>
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                          {{ getUserInitials(user) }}
+                        </div>
+                      </ng-template>
+                      <!-- Online status indicator -->
+                      <div *ngIf="user.isOnline"
+                           class="relative -top-3 -right-7 h-3 w-3 rounded-full bg-green-400 border-2 border-white"
+                           title="Online">
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                
+                <!-- Name & ID Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div>
+                    <div class="text-sm font-medium text-gray-900">
+                      {{ user.fullName }}
+                      <span *ngIf="isCurrentUser(user)" class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <i class="fas fa-user-circle mr-1"></i>You
+                      </span>
+                    </div>
+                    <div class="text-sm text-gray-500">ID: {{ getDisplayId(user) }}</div>
+                  </div>
+                </td>
+                
+                <!-- Email & Position Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div>
+                    <div class="text-sm text-gray-900">{{ user.email }}</div>
+                    <div class="text-sm text-gray-500">{{ user.position || 'N/A' }}</div>
+                  </div>
+                </td>
+                
+                <!-- Department Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ user.department || 'N/A' }}</div>
+                </td>
+                
+                <!-- Role Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <!-- Role Icon -->
+                    <div class="mr-3">
+                      <i class="fas fa-user-shield text-red-500" *ngIf="user.role === 'Admin'" title="Admin"></i>
+                      <i class="fas fa-hard-hat text-yellow-500" *ngIf="user.role === 'HSE'" title="HSE"></i>
+                      <i class="fas fa-user text-blue-500" *ngIf="user.role === 'Profil'" title="Profile"></i>
+                    </div>
+                    <!-- Role Selector -->
+                    <select 
+                      [ngModel]="user.role" 
+                      (change)="onRoleSelectionChange(user, $event)"
+                      [disabled]="isCurrentUser(user)"
+                      [class]="'text-sm border rounded px-2 py-1 focus:outline-none focus:ring-2 ' + (isCurrentUser(user) ? 'border-gray-200 bg-gray-100 cursor-not-allowed text-gray-500' : 'border-gray-300 focus:ring-blue-500')">
+                      <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+                    </select>
+                  </div>
+                </td>
+                
+                <!-- Status Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <!-- Status Toggle Switch -->
+                    <div class="flex items-center">
+                      <span class="text-sm text-gray-700 mr-3">{{ user.isActive ? 'Active' : 'Inactive' }}</span>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          [checked]="user.isActive"
+                          [disabled]="isCurrentUser(user) || isUserToggling(user)"
+                          (change)="toggleUserStatus(user, $event)"
+                          class="sr-only peer">
+                        <div class="relative w-11 h-6 bg-red-400 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"
+                             [class.opacity-50]="isCurrentUser(user) || isUserToggling(user)"
+                             [class.cursor-not-allowed]="isCurrentUser(user) || isUserToggling(user)"
+                             [class.animate-pulse]="isUserToggling(user)">
+                        </div>
+                        <!-- Loading spinner overlay -->
+                        <div *ngIf="isUserToggling(user)" class="absolute inset-0 flex items-center justify-center">
+                          <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </td>
+                
+                <!-- Actions Column -->
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div class="flex space-x-2" *ngIf="!isCurrentUser(user)">
+                    <button 
+                      (click)="editUser(user)"
+                      class="text-blue-600 hover:text-blue-900 px-3 py-1 border border-blue-600 rounded hover:bg-blue-50 transition">
+                      <i class="fas fa-edit mr-1"></i>Edit
+                    </button>
+                    <button 
+                      (click)="deleteUser(user.companyId!)"
+                      class="text-red-600 hover:text-red-900 px-3 py-1 border border-red-600 rounded hover:bg-red-50 transition">
+                      <i class="fas fa-trash mr-1"></i>Delete
+                    </button>
+                  </div>
+                  <div class="flex items-center text-gray-500" *ngIf="isCurrentUser(user)">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    <span class="text-xs font-medium">Your Account</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+          <div class="text-sm text-gray-700 text-center sm:text-left">
+            Page {{ currentPage }} of {{ totalPages }}
+          </div>
+          <div class="flex justify-center sm:justify-end space-x-2">
+            <button 
+              (click)="prevPage()"
+              [disabled]="currentPage === 1"
+              class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+              <i class="fas fa-chevron-left mr-1"></i>Previous
+            </button>
+            <button 
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+              class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+              Next<i class="fas fa-chevron-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      </div>
+      
+      <!-- User Requests Table Section -->
+      <div *ngIf="isRequestsTab() && !accessDenied" class="mb-16">
+        <!-- Loading State -->
+        <div *ngIf="requestsLoading" class="bg-white rounded-lg shadow-md p-8 text-center">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p class="text-gray-600">Loading requests...</p>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="requestsError && !requestsLoading" class="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex items-center">
+              <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+              <span class="text-red-700">{{ requestsError }}</span>
+              <button (click)="refreshRequests()" class="ml-auto px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Requests Table -->
+        <div *ngIf="!requestsLoading && !requestsError" class="bg-white rounded-lg shadow-md overflow-hidden">
+          <!-- Table Header Actions -->
+          <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <div class="text-sm text-gray-600">
+              Showing {{ userRequests.length }} of {{ requestsTotalCount }} requests
+            </div>
+            <button 
+              (click)="refreshRequests()" 
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+              <i class="fas fa-refresh mr-2"></i>Refresh
+            </button>
+          </div>
+
+          <!-- Data Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Company ID
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Full Name
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Department
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Position
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let request of paginatedUserRequests" class="hover:bg-gray-50">
+                  <!-- Company ID Column -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">{{ request.companyId }}</div>
+                  </td>
+                  
+                  <!-- Full Name Column -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{{ request.fullName }}</div>
+                  </td>
+                  
+                  <!-- Email Column -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{{ request.email }}</div>
+                  </td>
+                  
+                  <!-- Department Column -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{{ request.department }}</div>
+                  </td>
+                  
+                  <!-- Position Column -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{{ request.position }}</div>
+                  </td>
+                  
+                  <!-- Status Column -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span [class]="getStatusClass(request.status)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                      {{ request.status }}
+                    </span>
+                  </td>
+                  
+                  <!-- Actions Column -->
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div class="flex space-x-2" *ngIf="request.status === 'Pending'">
+                      <button 
+                        (click)="approveRequest(request.id)"
+                        [disabled]="request.processing"
+                        class="text-green-600 hover:text-green-900 px-3 py-1 border border-green-600 rounded hover:bg-green-50 transition disabled:opacity-50">
+                        <i class="fas fa-check mr-1"></i>{{ request.processing ? 'Processing...' : 'Approve' }}
+                      </button>
+                      <button 
+                        (click)="rejectRequest(request.id)"
+                        [disabled]="request.processing"
+                        class="text-red-600 hover:text-red-900 px-3 py-1 border border-red-600 rounded hover:bg-red-50 transition disabled:opacity-50">
+                        <i class="fas fa-times mr-1"></i>{{ request.processing ? 'Processing...' : 'Reject' }}
+                      </button>
+                    </div>
+                    <div *ngIf="request.status !== 'Pending'" class="text-gray-400 text-sm">
+                      {{ request.status === 'Approved' ? 'Approved' : 'Rejected' }}
+                    </div>
+                  </td>
+                </tr>
+                
+                <!-- Empty State -->
+                <tr *ngIf="paginatedUserRequests.length === 0">
+                  <td colspan="7" class="px-6 py-8 text-center">
+                    <div class="text-gray-500">
+                      <i class="fas fa-inbox text-4xl mb-4"></i>
+                      <p class="text-lg">No pending requests</p>
+                      <p class="text-sm">All user registration requests have been processed.</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div class="text-sm text-gray-700 text-center sm:text-left">
+              Page {{ requestsCurrentPage }} of {{ requestsTotalPages }}
+            </div>
+            <div class="flex justify-center sm:justify-end space-x-2">
+              <button 
+                (click)="requestsPrevPage()"
+                [disabled]="requestsCurrentPage === 1"
+                class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                <i class="fas fa-chevron-left mr-1"></i>Previous
+              </button>
+              <button 
+                (click)="requestsNextPage()"
+                [disabled]="requestsCurrentPage === requestsTotalPages"
+                class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                Next<i class="fas fa-chevron-right ml-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  <!-- Add User Modal -->
+  <app-user-modal
+    [show]="showAddUserModal"
+    [isLoading]="addUserLoading"
+    [error]="addUserError"
+    [departments]="departments"
+    title="Add New User"
+    submitButtonText="Create User"
+    (closeModal)="closeAddUserModal()"
+    (submitForm)="submitAddUser($event)">
+  </app-user-modal>
+
+  <!-- Delete User Confirmation Dialog -->
+  <app-confirmation-dialog
+    [isOpen]="showDeleteConfirmation"
+    [title]="'Delete User Account'"
+    [message]="userToDelete ? 'Are you sure you want to permanently delete ' + (userToDelete.fullName || userToDelete.firstName + ' ' + userToDelete.lastName) + '? This action cannot be undone and will remove all user data from the system.' : 'Are you sure you want to delete this user?'"
+    [confirmText]="'Delete User'"
+    [cancelText]="'Cancel'"
+    [confirmButtonClass]="'bg-red-600 hover:bg-red-700 text-white'"
+    [cancelButtonClass]="'bg-gray-300 hover:bg-gray-400 text-gray-800'"
+    [icon]="'danger'"
+    (confirm)="confirmDeleteUser()"
+    (cancel)="cancelDeleteUser()">
+  </app-confirmation-dialog>
+
+  <!-- Role Change Confirmation Dialog -->
+  <app-confirmation-dialog
+    [isOpen]="showRoleChangeConfirmation"
+    [title]="'Change User Role'"
+    [message]="getRoleChangeConfirmationMessage()"
+    [confirmText]="'Change Role'"
+    [cancelText]="'Cancel'"
+    [confirmButtonClass]="'bg-blue-600 hover:bg-blue-700 text-white'"
+    [cancelButtonClass]="'bg-gray-300 hover:bg-gray-400 text-gray-800'"
+    [icon]="'warning'"
+    (confirm)="confirmRoleChange()"
+    (cancel)="cancelRoleChange()">
+  </app-confirmation-dialog>
+
+  <!-- Deactivate User Confirmation Dialog -->
+  <app-confirmation-dialog
+    [isOpen]="showDeactivateConfirmation"
+    [title]="'Deactivate User Account'"
+    [message]="getDeactivationConfirmationMessage()"
+    [confirmText]="'Deactivate User'"
+    [cancelText]="'Cancel'"
+    [confirmButtonClass]="'bg-red-600 hover:bg-red-700 text-white'"
+    [cancelButtonClass]="'bg-gray-300 hover:bg-gray-400 text-gray-800'"
+    [icon]="'warning'"
+    (confirm)="confirmDeactivateUser()"
+    (cancel)="cancelDeactivateUser()">
+  </app-confirmation-dialog>
+
+  <!-- Edit User Modal -->
+  <app-edit-user-modal
+    [show]="showEditUserModal"
+    [user]="userToEdit"
+    [isLoading]="editUserLoading"
+    [error]="editUserError"
+    title="Edit User Profile"
+    (closeModal)="closeEditUserModal()"
+    (submitForm)="submitEditUser($event)">
+  </app-edit-user-modal>
+</div>

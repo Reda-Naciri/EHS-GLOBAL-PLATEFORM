@@ -1,0 +1,182 @@
+.wrapper-bodymap {
+  position: relative;
+  width: 100%;
+  max-width: 450px; /* largeur max du corps */
+  margin: 0 auto; /* centrer */
+}
+
+.human-body {
+  position: relative;
+  display: block;
+  margin: 30px auto;
+  transform: scale(0.4); /* Ajuste la taille du corps SVG */
+  transform-origin: top center;
+}
+
+  .human-body svg {
+    position: absolute;
+    left: 50%;
+  }
+
+    .human-body svg:hover {
+      cursor: pointer;
+    }
+
+      .human-body svg:hover path,
+      .human-body svg:hover ellipse {
+        fill: #f14d49;
+      }
+
+    .human-body svg.selected path {
+      fill: #3b82f6 !important;
+    }
+
+    /* Positionnement de chaque partie comme déjà défini */
+    .human-body svg#head {
+      margin-left: -27px;
+      top: -6px;
+    }
+
+    .human-body svg#orbit {
+      margin-left: -6px;
+      top: 27px;
+    }
+
+    .human-body svg#neck {
+      margin-left: -21px;
+      top: 70px;
+    }
+
+    .human-body svg#chest {
+      margin-left: -57px;
+      top: 140px;
+    }
+
+    .human-body svg#right-shoulder {
+      margin-left: -90px;
+      top: 100px;
+    }
+
+    .human-body svg#right-arm {
+      margin-left: -162px;
+      top: 210px;
+    }
+
+    .human-body svg#right-hand {
+      margin-left: -197px;
+      top: 387px;
+    }
+
+    .human-body svg#left-shoulder {
+      margin-left: 48px;
+      top: 95px;
+    }
+
+    .human-body svg#left-arm {
+      margin-left: 100px;
+      top: 202px;
+    }
+
+    .human-body svg#left-hand {
+      margin-left: 172px;
+      top: 336px;
+    }
+
+    .human-body svg.injured-part path,
+    .human-body svg.injured-part ellipse {
+      fill: #dc2626 !important; /* Rouge vif */
+    }
+
+
+
+    .human-body svg#abdomen {
+      margin-left: -70px;
+      top: 210px;
+    }
+
+    .human-body svg#right-leg {
+      margin-left: -110px;
+      top: 420px;
+      z-index: 9999;
+    }
+
+    .human-body svg#right-foot {
+      margin-left: -70px;
+      top: 773px;
+    }
+
+    .human-body svg#left-leg {
+      margin-left: -10px;
+      top: 415px;
+      z-index: 9999;
+    }
+
+    .human-body svg#left-foot {
+      margin-left: 40px;
+      top: 771px;
+    }
+
+:host([mode='view']) .human-body svg:hover path,
+:host([mode='view']) .human-body svg:hover ellipse {
+  fill: #D9D9D9 !important;
+  cursor: default !important;
+}
+
+/* Back body part button styling */
+.back-body-part {
+  position: absolute;
+  right: -130px;
+  top: 20px;
+  width: 90px;
+  height: 60px;
+  background-color: #D9D9D9;
+  border: 2px solid #B0B0B0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.back-body-part:hover {
+  background-color: #f14d49;
+  border-color: #e11d48;
+  color: white;
+}
+
+.back-body-part.selected {
+  background-color: #3b82f6 !important;
+  border-color: #2563eb;
+  color: white;
+}
+
+.back-body-part.injured-part {
+  background-color: #dc2626 !important;
+  border-color: #b91c1c;
+  color: white;
+}
+
+.back-body-part span {
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Disable hover effects in view mode for back button */
+:host([mode='view']) .back-body-part:hover {
+  background-color: #D9D9D9 !important;
+  border-color: #B0B0B0 !important;
+  color: inherit !important;
+  cursor: default !important;
+}
+
+:host([mode='view']) .back-body-part.injured-part:hover {
+  background-color: #dc2626 !important;
+  border-color: #b91c1c !important;
+  color: white !important;
+}

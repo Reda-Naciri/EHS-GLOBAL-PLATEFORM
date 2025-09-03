@@ -1,0 +1,261 @@
+.email-timers-container {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.timers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.timers-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timers-title i {
+  color: #3498db;
+}
+
+.refresh-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.refresh-btn:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.refresh-btn i {
+  transition: transform 0.3s ease;
+}
+
+.refresh-btn:hover i {
+  transform: rotate(180deg);
+}
+
+.timers-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .timers-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.timer-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.timer-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.timer-card.disabled {
+  background: #f5f5f5;
+  opacity: 0.7;
+}
+
+.timer-card.disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.timer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.timer-label {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timer-label i {
+  font-size: 1.2rem;
+}
+
+.timer-card:nth-child(1) .timer-label i {
+  color: #4CAF50;
+}
+
+.timer-card:nth-child(2) .timer-label i {
+  color: #FF9800;
+}
+
+.timer-interval {
+  font-size: 0.85rem;
+  color: #666;
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.timer-circle {
+  position: relative;
+  display: inline-block;
+  margin: 16px 0;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-background {
+  opacity: 0.3;
+}
+
+.progress-ring-progress {
+  transition: stroke-dashoffset 0.5s ease;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.1));
+}
+
+.hse-progress {
+  stroke: #4CAF50;
+  filter: drop-shadow(0 0 6px rgba(76, 175, 80, 0.3));
+}
+
+.admin-progress {
+  stroke: #FF9800;
+  filter: drop-shadow(0 0 6px rgba(255, 152, 0, 0.3));
+}
+
+.timer-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.time-remaining {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.time-remaining.disabled-text {
+  color: #999;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.timer-status {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.timer-details {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+.last-sent {
+  color: #666;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.last-sent::before {
+  content: "📤";
+  font-size: 0.9rem;
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.timer-card.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Success/Due animations */
+.timer-card.due .time-remaining {
+  color: #e74c3c;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.timer-card.due .progress-ring-progress {
+  stroke: #e74c3c !important;
+  filter: drop-shadow(0 0 8px rgba(231, 76, 60, 0.4)) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .email-timers-container {
+    padding: 16px;
+  }
+  
+  .timer-card {
+    padding: 16px;
+  }
+  
+  .timers-title {
+    font-size: 1.1rem;
+  }
+  
+  .progress-ring {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .progress-ring circle {
+    r: 42;
+    cx: 50;
+    cy: 50;
+  }
+  
+  .time-remaining {
+    font-size: 1.2rem;
+  }
+}

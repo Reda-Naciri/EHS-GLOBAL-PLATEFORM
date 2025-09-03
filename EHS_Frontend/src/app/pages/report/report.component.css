@@ -1,0 +1,53 @@
+/* Back to Home Button */
+.back-to-home {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
+.home-btn {
+  background: #E98300;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(233, 131, 0, 0.3);
+}
+
+.home-btn:hover {
+  background: #cc7400;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(233, 131, 0, 0.4);
+}
+
+.home-icon {
+  font-size: 16px;
+  line-height: 1;
+  color: white;
+  font-weight: bold;
+}
+
+.human-body {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+  .human-body svg {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 100%;
+    height: auto;
+  }
+
+/* Le reste (hover, selected, positions spécifiques) reste inchangé */

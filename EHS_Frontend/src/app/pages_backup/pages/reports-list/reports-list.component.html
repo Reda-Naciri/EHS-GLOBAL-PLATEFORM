@@ -1,0 +1,108 @@
+<div class="reports-wrapper">
+  <!-- KPI Section -->
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4">Key Performance Indicators</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedType === 'Hasard'"
+           [class.ring-red-500]="selectedType === 'Hasard'"
+           (click)="toggleTypeFilter('Hasard')">
+        <div class="text-3xl font-bold text-red-500">{{ getTypeCount('Hasard') }}</div>
+        <div class="text-gray-700 font-medium">Hazard Situations</div>
+        <div class="mt-2 h-2 bg-gray-200 rounded-full">
+          <div class="h-2 bg-red-500 rounded-full" [style.width.%]="getTypePercentage('Hasard')"></div>
+        </div>
+      </div>
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedType === 'Nearhit'"
+           [class.ring-yellow-500]="selectedType === 'Nearhit'"
+           (click)="toggleTypeFilter('Nearhit')">
+        <div class="text-3xl font-bold text-yellow-500">{{ getTypeCount('Nearhit') }}</div>
+        <div class="text-gray-700 font-medium">Near Hits</div>
+        <div class="mt-2 h-2 bg-gray-200 rounded-full">
+          <div class="h-2 bg-yellow-500 rounded-full" [style.width.%]="getTypePercentage('Nearhit')"></div>
+        </div>
+      </div>
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedType === 'Enviroment-aspect'"
+           [class.ring-green-500]="selectedType === 'Enviroment-aspect'"
+           (click)="toggleTypeFilter('Enviroment-aspect')">
+        <div class="text-3xl font-bold text-green-500">{{ getTypeCount('Enviroment-aspect') }}</div>
+        <div class="text-gray-700 font-medium">Environmental Aspects</div>
+        <div class="mt-2 h-2 bg-gray-200 rounded-full">
+          <div class="h-2 bg-green-500 rounded-full" [style.width.%]="getTypePercentage('Enviroment-aspect')"></div>
+        </div>
+      </div>
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedType === 'Improvement-Idea'"
+           [class.ring-purple-500]="selectedType === 'Improvement-Idea'"
+           (click)="toggleTypeFilter('Improvement-Idea')">
+        <div class="text-3xl font-bold text-purple-500">{{ getTypeCount('Improvement-Idea') }}</div>
+        <div class="text-gray-700 font-medium">Improvement Ideas</div>
+        <div class="mt-2 h-2 bg-gray-200 rounded-full">
+          <div class="h-2 bg-purple-500 rounded-full" [style.width.%]="getTypePercentage('Improvement-Idea')"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedStatus === 'Not Started'"
+           [class.ring-gray-500]="selectedStatus === 'Not Started'"
+           (click)="toggleStatusFilter('Not Started')">
+        <div class="text-3xl font-bold text-gray-600">{{ getStatusCount('Not Started') }}</div>
+        <div class="text-gray-700 font-medium">Not Started</div>
+      </div>
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedStatus === 'In Progress'"
+           [class.ring-yellow-500]="selectedStatus === 'In Progress'"
+           (click)="toggleStatusFilter('In Progress')">
+        <div class="text-3xl font-bold text-yellow-500">{{ getStatusCount('In Progress') }}</div>
+        <div class="text-gray-700 font-medium">In Progress</div>
+      </div>
+      <div class="kpi-card bg-white rounded-lg shadow p-4 text-center cursor-pointer"
+           [class.ring-2]="selectedStatus === 'Completed'"
+           [class.ring-green-500]="selectedStatus === 'Completed'"
+           (click)="toggleStatusFilter('Completed')">
+        <div class="text-3xl font-bold text-green-500">{{ getStatusCount('Completed') }}</div>
+        <div class="text-gray-700 font-medium">Completed</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🔍 Barre de recherche -->
+  <div class="mb-4">
+    <input type="text"
+           placeholder="Search reports..."
+           [(ngModel)]="searchQuery"
+           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-300" />
+  </div>
+
+  <!-- 📋 Liste filtrée des rapports -->
+  <div *ngFor="let report of filteredReports" class="report-card" [ngClass]="getTypeClass(report.type)">
+    <div class="report-header" (click)="toggle(report)">
+      <div class="report-header-left">
+        <span class="report-icon">{{ report.icon }}</span>
+        <div>
+          <h3 class="report-title">
+            {{ report.title }}
+            <span [ngClass]="getStatusClass(report.status)" class="status-badge">
+              {{ report.status }}
+            </span>
+          </h3>
+          <p class="report-meta">🗕️ {{ report.situationDateTime | date: 'dd/MM/yyyy' }} - 👤 {{ report.author }}</p>
+        </div>
+      </div>
+      <i [ngClass]="{
+           'fa-chevron-down': !report.expanded,
+           'fa-chevron-up': report.expanded
+         }" class="fa-solid report-toggle-icon"></i>
+    </div>
+
+    <div *ngIf="report.expanded" class="report-details">
+      <p><strong>📍 Zone:</strong> {{ report.zone }}</p>
+      <p><strong>📝 Type:</strong> {{ report.type }}</p>
+      <button [routerLink]="['/reports', report.id]" class="view-more-btn">➕ Voir plus</button>
+    </div>
+  </div>
+</div>

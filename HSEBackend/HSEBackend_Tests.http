@@ -1,0 +1,559 @@
+### HSEBackend API Testing Suite
+### Base URL and Variables
+@baseUrl = http://localhost:5225
+@contentType = application/json
+@jwtToken = PUT_YOUR_JWT_TOKEN_HERE
+
+### ==================================================
+### PUBLIC ENDPOINTS (No Authentication Required)
+### ==================================================
+
+### 1. Submit Report - Valid Incident Report
+POST {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "reporterId": "TE001",
+  "workShift": "Day",
+  "title": "Test Safety Incident Report",
+  "type": "Incident-Management",
+  "zone": "Production Area A",
+  "incidentDateTime": "2024-01-15T10:30:00",
+  "description": "Test incident description with sufficient detail to meet minimum requirements for validation.",
+  "injuredPersonsCount": 1,
+  "injuredPersons": [
+    {
+      "name": "John Doe",
+      "department": "Production",
+      "zoneOfPerson": "Area A",
+      "gender": "Male",
+      "selectedBodyPart": "head",
+      "injuryType": "Cut",
+      "severity": "Minor",
+      "injuryDescription": "Small cut on forehead from equipment"
+    }
+  ],
+  "immediateActionsTaken": "First aid applied, area secured, supervisor notified",
+  "actionStatus": "Completed",
+  "personInChargeOfActions": "Supervisor John Smith",
+  "dateActionsCompleted": "2024-01-15T11:00:00"
+}
+
+### 2. Submit Report - Near Miss Report
+POST {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "reporterId": "TE002",
+  "workShift": "Afternoon",
+  "title": "Near Miss - Falling Object",
+  "type": "Near-Miss",
+  "zone": "Warehouse Section B",
+  "incidentDateTime": "2024-01-15T14:30:00",
+  "description": "A pallet nearly fell from the storage rack due to improper stacking. No injuries occurred but could have been serious.",
+  "injuredPersonsCount": 0,
+  "injuredPersons": [],
+  "immediateActionsTaken": "Area cordoned off, pallet repositioned, safety inspection scheduled",
+  "actionStatus": "In Progress",
+  "personInChargeOfActions": "Warehouse Manager",
+  "dateActionsCompleted": null
+}
+
+### 3. Submit Report - Invalid Data (Missing Required Fields)
+POST {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "reporterId": "",
+  "workShift": "",
+  "title": "",
+  "type": "",
+  "zone": "",
+  "description": "Too short"
+}
+
+### 4. Submit Report - Environmental Incident
+POST {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "reporterId": "TE003",
+  "workShift": "Night",
+  "title": "Chemical Spill in Laboratory",
+  "type": "Environmental",
+  "zone": "Laboratory C",
+  "incidentDateTime": "2024-01-15T22:15:00",
+  "description": "Small chemical spill of cleaning solution in laboratory. Contained quickly but requires proper documentation and cleanup verification.",
+  "injuredPersonsCount": 0,
+  "injuredPersons": [],
+  "immediateActionsTaken": "Spill contained, area ventilated, cleanup crew notified",
+  "actionStatus": "Completed",
+  "personInChargeOfActions": "Night Shift Supervisor",
+  "dateActionsCompleted": "2024-01-15T23:00:00"
+}
+
+### 5. Submit Registration Request - Valid Request
+POST {{baseUrl}}/api/register-request
+Content-Type: {{contentType}}
+
+{
+  "fullName": "Jane Smith",
+  "companyId": "TE004",
+  "email": "jane.smith@te.com",
+  "department": "Quality Assurance"
+}
+
+### 6. Submit Registration Request - Another Valid Request
+POST {{baseUrl}}/api/register-request
+Content-Type: {{contentType}}
+
+{
+  "fullName": "Bob Johnson",
+  "companyId": "TE005",
+  "email": "bob.johnson@te.com",
+  "department": "Engineering"
+}
+
+### 7. Submit Registration Request - Duplicate (Should Fail)
+POST {{baseUrl}}/api/register-request
+Content-Type: {{contentType}}
+
+{
+  "fullName": "Jane Smith",
+  "companyId": "TE004",
+  "email": "jane.smith@te.com",
+  "department": "Quality Assurance"
+}
+
+### 8. Submit Registration Request - Invalid Data
+POST {{baseUrl}}/api/register-request
+Content-Type: {{contentType}}
+
+{
+  "fullName": "",
+  "companyId": "",
+  "email": "invalid-email",
+  "department": ""
+}
+
+### ==================================================
+### AUTHENTICATED ENDPOINTS (JWT Required)
+### ==================================================
+
+### 9. Get All Reports (No Filters)
+GET {{baseUrl}}/api/reports
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 10. Get Reports with Filters
+GET {{baseUrl}}/api/reports?type=Incident-Management&status=Pending&zone=Production
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 11. Get Reports - Filter by Type Only
+GET {{baseUrl}}/api/reports?type=Near-Miss
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 12. Get Reports - Filter by Status Only
+GET {{baseUrl}}/api/reports?status=New
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 13. Get Reports - Filter by Zone Only
+GET {{baseUrl}}/api/reports?zone=Production Area A
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 14. Get Report Details - Valid ID
+GET {{baseUrl}}/api/reports/1
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 15. Get Report Details - Another Valid ID
+GET {{baseUrl}}/api/reports/2
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 16. Get Report Details - Non-existent ID
+GET {{baseUrl}}/api/reports/9999
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 17. Update Report Status - To In Progress
+PUT {{baseUrl}}/api/reports/1/status
+Authorization: Bearer {{jwtToken}}
+Content-Type: {{contentType}}
+
+{
+  "status": "In Progress"
+}
+
+### 18. Update Report Status - To Completed
+PUT {{baseUrl}}/api/reports/1/status
+Authorization: Bearer {{jwtToken}}
+Content-Type: {{contentType}}
+
+{
+  "status": "Completed"
+}
+
+### 19. Update Report Status - To Rejected
+PUT {{baseUrl}}/api/reports/1/status
+Authorization: Bearer {{jwtToken}}
+Content-Type: {{contentType}}
+
+{
+  "status": "Rejected"
+}
+
+### 20. Update Report Status - Invalid Status
+PUT {{baseUrl}}/api/reports/1/status
+Authorization: Bearer {{jwtToken}}
+Content-Type: {{contentType}}
+
+{
+  "status": "InvalidStatus"
+}
+
+### 21. Add Comment to Report - Valid Comment
+POST {{baseUrl}}/api/reports/1/comments
+Authorization: Bearer {{jwtToken}}
+Content-Type: {{contentType}}
+
+{
+  "content": "This incident has been reviewed by the HSE team. Initial investigation shows compliance with safety protocols."
+}
+
+### 22. Add Comment to Report - Another Comment
+POST {{baseUrl}}/api/reports/1/comments
+Authorization: Bearer {{jwtToken}}
+Content-Type: {{contentType}}
+
+{
+  "content": "Follow-up required: Schedule safety training session for the production team."
+}
+
+### 23. Add Comment to Report - Empty Comment (Should Fail)
+POST {{baseUrl}}/api/reports/1/comments
+Authorization: Bearer {{jwtToken}}
+Content-Type: {{contentType}}
+
+{
+  "content": ""
+}
+
+### 24. Add Comment to Non-existent Report
+POST {{baseUrl}}/api/reports/9999/comments
+Authorization: Bearer {{jwtToken}}
+Content-Type: {{contentType}}
+
+{
+  "content": "This should fail because the report doesn't exist."
+}
+
+### 25. Get Recent Reports - Default Limit
+GET {{baseUrl}}/api/reports/recent
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 26. Get Recent Reports - Custom Limit
+GET {{baseUrl}}/api/reports/recent?limit=5
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 27. Get Recent Reports - Large Limit
+GET {{baseUrl}}/api/reports/recent?limit=50
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 28. Get All Registration Requests
+GET {{baseUrl}}/api/register-request
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### 29. Approve Registration Request - Valid ID
+PUT {{baseUrl}}/api/register-request/1/approve
+Authorization: Bearer {{jwtToken}}
+
+### 30. Approve Registration Request - Another Valid ID
+PUT {{baseUrl}}/api/register-request/2/approve
+Authorization: Bearer {{jwtToken}}
+
+### 31. Reject Registration Request - Valid ID
+PUT {{baseUrl}}/api/register-request/3/reject
+Authorization: Bearer {{jwtToken}}
+
+### 32. Approve Non-existent Registration Request
+PUT {{baseUrl}}/api/register-request/9999/approve
+Authorization: Bearer {{jwtToken}}
+
+### 33. Reject Non-existent Registration Request
+PUT {{baseUrl}}/api/register-request/9999/reject
+Authorization: Bearer {{jwtToken}}
+
+### 34. Get Pending Users
+GET {{baseUrl}}/api/pending-users
+Authorization: Bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### ==================================================
+### AUTHENTICATION AND AUTHORIZATION TESTING
+### ==================================================
+
+### 35. Access Protected Endpoint Without Token (Should Return 401)
+GET {{baseUrl}}/api/reports
+Accept: {{contentType}}
+
+### 36. Access Protected Endpoint with Invalid Token (Should Return 401)
+GET {{baseUrl}}/api/reports
+Authorization: Bearer invalid_jwt_token_here
+Accept: {{contentType}}
+
+### 37. Access Protected Endpoint with Malformed Token (Should Return 401)
+GET {{baseUrl}}/api/reports
+Authorization: Bearer malformed.jwt.token
+Accept: {{contentType}}
+
+### 38. Test Token Format - Missing Bearer Prefix
+GET {{baseUrl}}/api/reports
+Authorization: {{jwtToken}}
+Accept: {{contentType}}
+
+### 39. Test Case Sensitivity - bearer vs Bearer
+GET {{baseUrl}}/api/reports
+Authorization: bearer {{jwtToken}}
+Accept: {{contentType}}
+
+### ==================================================
+### ERROR HANDLING AND EDGE CASES
+### ==================================================
+
+### 40. Submit Report with Invalid JSON
+POST {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "reporterId": "TE001",
+  "workShift": "Day",
+  "title": "Test Report",
+  "type": "Incident-Management",
+  "zone": "Production Area A",
+  "incidentDateTime": "invalid-date-format",
+  "description": "Test description",
+  "injuredPersonsCount": "not-a-number"
+}
+
+### 41. Submit Report with Null Values
+POST {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "reporterId": null,
+  "workShift": null,
+  "title": null,
+  "type": null,
+  "zone": null,
+  "incidentDateTime": null,
+  "description": null,
+  "injuredPersonsCount": null,
+  "injuredPersons": null
+}
+
+### 42. Submit Report with Very Long Description
+POST {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "reporterId": "TE001",
+  "workShift": "Day",
+  "title": "Test Report with Very Long Description",
+  "type": "Incident-Management",
+  "zone": "Production Area A",
+  "incidentDateTime": "2024-01-15T10:30:00",
+  "description": "This is a very long description that contains more than 1000 characters. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.",
+  "injuredPersonsCount": 0,
+  "injuredPersons": []
+}
+
+### 43. Test Special Characters in Report
+POST {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "reporterId": "TE001",
+  "workShift": "Day",
+  "title": "Test Report with Special Characters: @#$%^&*()_+",
+  "type": "Incident-Management",
+  "zone": "Production Area A",
+  "incidentDateTime": "2024-01-15T10:30:00",
+  "description": "Report with special characters: !@#$%^&*()_+{}[]|\\:;\"'<>,.?/~`",
+  "injuredPersonsCount": 0,
+  "injuredPersons": []
+}
+
+### 44. Test Unicode Characters in Report
+POST {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "reporterId": "TE001",
+  "workShift": "Day",
+  "title": "Test Report with Unicode: 测试 Тест العربية",
+  "type": "Incident-Management",
+  "zone": "Production Area A",
+  "incidentDateTime": "2024-01-15T10:30:00",
+  "description": "Unicode test: English, 中文, Русский, العربية, Español, Français, Deutsch, 日本語, 한국어",
+  "injuredPersonsCount": 0,
+  "injuredPersons": []
+}
+
+### 45. Test with Missing Content-Type Header
+POST {{baseUrl}}/api/reports
+
+{
+  "reporterId": "TE001",
+  "workShift": "Day",
+  "title": "Test Report",
+  "type": "Incident-Management",
+  "zone": "Production Area A",
+  "incidentDateTime": "2024-01-15T10:30:00",
+  "description": "Test description without content-type header",
+  "injuredPersonsCount": 0,
+  "injuredPersons": []
+}
+
+### 46. Test with Wrong Content-Type Header
+POST {{baseUrl}}/api/reports
+Content-Type: text/plain
+
+{
+  "reporterId": "TE001",
+  "workShift": "Day",
+  "title": "Test Report",
+  "type": "Incident-Management",
+  "zone": "Production Area A",
+  "incidentDateTime": "2024-01-15T10:30:00",
+  "description": "Test description with wrong content-type header",
+  "injuredPersonsCount": 0,
+  "injuredPersons": []
+}
+
+### ==================================================
+### PERFORMANCE AND LOAD TESTING PREPARATION
+### ==================================================
+
+### 47. Minimal Valid Report (For Load Testing)
+POST {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "reporterId": "TE001",
+  "workShift": "Day",
+  "title": "Minimal Test Report",
+  "type": "Near-Miss",
+  "zone": "Test Area",
+  "incidentDateTime": "2024-01-15T10:30:00",
+  "description": "Minimal test report for load testing purposes",
+  "injuredPersonsCount": 0,
+  "injuredPersons": []
+}
+
+### 48. Complex Report with Multiple Injuries (For Load Testing)
+POST {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "reporterId": "TE001",
+  "workShift": "Day",
+  "title": "Complex Test Report with Multiple Injuries",
+  "type": "Incident-Management",
+  "zone": "Production Area A",
+  "incidentDateTime": "2024-01-15T10:30:00",
+  "description": "Complex test report with multiple injured persons for load testing purposes",
+  "injuredPersonsCount": 3,
+  "injuredPersons": [
+    {
+      "name": "Person 1",
+      "department": "Production",
+      "zoneOfPerson": "Area A",
+      "gender": "Male",
+      "selectedBodyPart": "head",
+      "injuryType": "Cut",
+      "severity": "Minor",
+      "injuryDescription": "First injury description"
+    },
+    {
+      "name": "Person 2",
+      "department": "Production",
+      "zoneOfPerson": "Area A",
+      "gender": "Female",
+      "selectedBodyPart": "hand",
+      "injuryType": "Burn",
+      "severity": "Moderate",
+      "injuryDescription": "Second injury description"
+    },
+    {
+      "name": "Person 3",
+      "department": "Production",
+      "zoneOfPerson": "Area A",
+      "gender": "Male",
+      "selectedBodyPart": "leg",
+      "injuryType": "Fracture",
+      "severity": "Severe",
+      "injuryDescription": "Third injury description"
+    }
+  ],
+  "immediateActionsTaken": "Emergency response activated, all persons evacuated to safe area",
+  "actionStatus": "In Progress",
+  "personInChargeOfActions": "Emergency Response Team",
+  "dateActionsCompleted": null
+}
+
+### ==================================================
+### HEALTH CHECK AND MONITORING
+### ==================================================
+
+### 49. Check if API is Running (Should work even without endpoints)
+GET {{baseUrl}}/
+
+### 50. Check Swagger Documentation
+GET {{baseUrl}}/swagger/index.html
+
+### 51. Test Invalid Endpoint
+GET {{baseUrl}}/api/invalid-endpoint
+Accept: {{contentType}}
+
+### 52. Test Invalid HTTP Method
+PATCH {{baseUrl}}/api/reports
+Content-Type: {{contentType}}
+
+{
+  "test": "data"
+}
+
+### ==================================================
+### NOTES FOR TESTING
+### ==================================================
+
+# To use this file:
+# 1. Install the REST Client extension in VS Code
+# 2. Replace {{jwtToken}} with a valid JWT token
+# 3. Ensure the backend server is running on localhost:5225
+# 4. Run each test by clicking the "Send Request" button
+# 5. Check the response status codes and content
+
+# Expected Response Codes:
+# 200 OK - Successful operation
+# 400 Bad Request - Invalid input data
+# 401 Unauthorized - Missing or invalid JWT token
+# 403 Forbidden - Valid token but insufficient permissions
+# 404 Not Found - Resource not found
+# 500 Internal Server Error - Server-side error
+
+# Test Order Recommendation:
+# 1. Start with public endpoints (tests 1-8)
+# 2. Test authentication (tests 35-39)
+# 3. Test protected endpoints (tests 9-34)
+# 4. Test error handling (tests 40-46)
+# 5. Test edge cases and performance (tests 47-52)

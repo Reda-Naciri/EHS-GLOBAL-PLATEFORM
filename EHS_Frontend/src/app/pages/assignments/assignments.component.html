@@ -1,0 +1,374 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+  <!-- Back to Home Button -->
+  <div class="back-to-home">
+    <button (click)="goHome()" class="home-btn">
+      <span class="home-icon">←</span> Back to Home
+    </button>
+  </div>
+
+  <div class="container mx-auto px-4 py-8 mt-15">
+    <!-- Enhanced Header -->
+    <header class="mb-12 text-center">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mb-6 shadow-lg">
+        <i class="fas fa-clipboard-list text-3xl text-white"></i>
+      </div>
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent mb-4">My Assignments</h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">Access and manage your assigned tasks and activities with ease</p>
+    </header>
+
+
+    <!-- Enhanced Search Section -->
+    <div *ngIf="searchMode" class="max-w-2xl mx-auto">
+      <div class="bg-white rounded-2xl shadow-2xl p-10 border border-gray-100 backdrop-blur-sm">
+        <div class="text-center mb-8">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full mb-6">
+            <i class="fas fa-id-card text-2xl text-orange-600"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-3">Enter Your Company ID</h2>
+          <p class="text-gray-600 text-lg">Please enter your company ID to access your personalized assignments dashboard</p>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <i class="fas fa-building text-gray-400"></i>
+            </div>
+            <input
+              type="text"
+              [(ngModel)]="companyId"
+              placeholder="Enter Company ID (e.g., EMP001)"
+              class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-100 focus:border-orange-500 text-lg font-medium transition-all duration-300 hover:border-gray-300"
+              (keyup.enter)="searchAssignments()">
+          </div>
+          
+          <button
+            (click)="searchAssignments()"
+            [disabled]="!companyId.trim() || loading"
+            class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 px-8 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+            <i *ngIf="loading" class="fas fa-spinner fa-spin mr-3"></i>
+            <i *ngIf="!loading" class="fas fa-search mr-3"></i>
+            {{ loading ? 'Searching...' : 'Access My Assignments' }}
+          </button>
+        </div>
+        
+        <div class="mt-8 p-4 bg-orange-50 rounded-xl border border-orange-100">
+          <div class="flex items-center text-orange-700">
+            <i class="fas fa-info-circle mr-2"></i>
+            <p class="text-sm font-medium">Need help? Contact your supervisor or HR department for your Company ID.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Assignments Content -->
+    <div *ngIf="!searchMode && !loading" class="max-w-7xl mx-auto">
+      <!-- Enhanced Header with Company ID and Reset -->
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-6 mb-8 text-white shadow-xl">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <div class="flex items-center mb-2">
+              <i class="fas fa-user mr-3 text-xl"></i>
+              <div>
+                <h3 class="text-xl font-bold">{{ companyUser?.fullName || 'Unknown User' }}</h3>
+                <p class="text-sm text-orange-200 flex items-center">
+                  <i class="fas fa-id-card mr-1"></i>
+                  Company ID: {{ companyId }}
+                </p>
+                <div *ngIf="companyUser?.department || companyUser?.position" class="text-xs text-orange-300 mt-1">
+                  <p *ngIf="companyUser?.position" class="flex items-center">
+                    <i class="fas fa-briefcase mr-1"></i>
+                    {{ companyUser.position || 'N/A' }}
+                  </p>
+                  <p *ngIf="companyUser?.department" class="flex items-center">
+                    <i class="fas fa-building mr-1"></i>
+                    {{ companyUser.department }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <p class="text-orange-100 flex items-center">
+              <i class="fas fa-tasks mr-2"></i>
+              {{ stats.total }} sub-actions found
+            </p>
+          </div>
+          <button
+            (click)="resetSearch()"
+            class="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 backdrop-blur-sm border border-white/20 hover:border-white/40">
+            <i class="fas fa-search mr-2"></i> New Search
+          </button>
+        </div>
+      </div>
+
+      <!-- Enhanced Statistics Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+        <div class="bg-white rounded-2xl shadow-lg p-6 text-center border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+          <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-list text-gray-600 text-xl"></i>
+          </div>
+          <div class="text-3xl font-bold text-gray-800 mb-1">{{ stats.total }}</div>
+          <div class="text-sm font-medium text-gray-600">Total</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg p-6 text-center border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+          <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-play-circle text-gray-500 text-xl"></i>
+          </div>
+          <div class="text-3xl font-bold text-gray-500 mb-1">{{ stats.notStarted }}</div>
+          <div class="text-sm font-medium text-gray-600">Not Started</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg p-6 text-center border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+          <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-clock text-orange-600 text-xl"></i>
+          </div>
+          <div class="text-3xl font-bold text-orange-600 mb-1">{{ stats.inProgress }}</div>
+          <div class="text-sm font-medium text-gray-600">In Progress</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg p-6 text-center border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+          </div>
+          <div class="text-3xl font-bold text-green-600 mb-1">{{ stats.completed }}</div>
+          <div class="text-sm font-medium text-gray-600">Completed</div>
+        </div>
+      </div>
+
+      <!-- Enhanced Filters -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+        <div class="flex items-center mb-6">
+          <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+            <i class="fas fa-filter text-orange-600"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-800">Filter & Search</h3>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+            <div class="relative">
+              <select [(ngModel)]="selectedStatus" (change)="applyFilters()"
+                      class="w-full pl-4 pr-10 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-100 focus:border-orange-500 font-medium transition-all duration-300 appearance-none bg-white">
+                <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+              </select>
+              <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                <i class="fas fa-chevron-down text-gray-400"></i>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Priority</label>
+            <div class="relative">
+              <select [(ngModel)]="selectedPriority" (change)="applyFilters()"
+                      class="w-full pl-4 pr-10 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-100 focus:border-orange-500 font-medium transition-all duration-300 appearance-none bg-white">
+                <option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option>
+              </select>
+              <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                <i class="fas fa-chevron-down text-gray-400"></i>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Search</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+              </div>
+              <input
+                type="text"
+                [(ngModel)]="searchTerm"
+                (input)="applyFilters()"
+                placeholder="Search actions and sub-actions..."
+                class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-100 focus:border-orange-500 font-medium transition-all duration-300">
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end">
+          <button
+            (click)="clearFilters()"
+            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-xl font-medium transition-all duration-300 hover:shadow-md">
+            <i class="fas fa-times mr-2"></i> Clear Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Enhanced Action Cards with Sub-Actions -->
+      <div class="space-y-6">
+        <!-- Action Cards -->
+        <div *ngFor="let action of filteredActions; trackBy: trackByActionId" 
+             class="bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden">
+          
+          <!-- Action Header -->
+          <div class="p-6 pb-4 bg-gradient-to-r from-orange-50 to-orange-100">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-tasks text-orange-600 text-xl"></i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <h3 class="text-lg font-bold text-gray-900 leading-tight">{{ action.title }}</h3>
+                      <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold border" 
+                            [ngClass]="getStatusClass(action.status)">
+                        <i class="fas mr-1" [ngClass]="getStatusIcon(action.status)"></i>
+                        {{ action.status }}
+                      </span>
+                      <span *ngIf="isOverdue(action)" 
+                            class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold border" 
+                            [ngClass]="getOverdueClass()">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        Overdue
+                      </span>
+                    </div>
+                    <p class="text-gray-600 text-sm line-clamp-2">{{ action.description }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Action status updates automatically -->
+            </div>
+            
+            <!-- Action Details -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+              <!-- Author -->
+              <div class="text-center">
+                <div class="text-xs font-medium text-gray-600 mb-1">Author</div>
+                <div class="text-sm font-semibold text-gray-800">{{ action.author || 'Unknown' }}</div>
+              </div>
+              
+              <!-- Priority -->
+              <div class="text-center">
+                <div class="text-xs font-medium text-gray-600 mb-1">Priority</div>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border" 
+                      [ngClass]="getPriorityClass(action.priority || 'Medium')">
+                  {{ action.priority || 'Medium' }}
+                </span>
+              </div>
+              
+              <!-- Deadline -->
+              <div class="text-center">
+                <div class="text-xs font-medium text-gray-600 mb-1">Deadline</div>
+                <div class="text-sm font-bold text-gray-800">
+                  <i class="fas fa-calendar mr-1"></i>
+                  {{ formatDate(action.dueDate) }}
+                </div>
+              </div>
+              
+              <!-- Created -->
+              <div class="text-center">
+                <div class="text-xs font-medium text-gray-600 mb-1">Created</div>
+                <div class="text-sm font-semibold text-gray-800">{{ formatDate(action.createdAt) }}</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Sub-Actions Section -->
+          <div class="p-6">
+            <div class="flex items-center mb-4">
+              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-list text-gray-600"></i>
+              </div>
+              <h4 class="text-md font-semibold text-gray-800">Sub-Actions ({{ action.subActions.length }})</h4>
+            </div>
+            
+            <!-- Sub-Action Items -->
+            <div class="space-y-3">
+              <div *ngFor="let subAction of action.subActions; trackBy: trackBySubActionId"
+                   class="bg-gray-50 rounded-xl p-4 border border-gray-200 hover:bg-gray-100 transition-colors duration-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                      <h5 class="font-semibold text-gray-900">{{ subAction.title }}</h5>
+                      <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold border" 
+                            [ngClass]="getStatusClass(subAction.status)">
+                        <i class="fas mr-1" [ngClass]="getStatusIcon(subAction.status)"></i>
+                        {{ subAction.status }}
+                      </span>
+                      <span *ngIf="isOverdue(subAction)" 
+                            class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold border" 
+                            [ngClass]="getOverdueClass()">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        Overdue
+                      </span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-2">{{ subAction.description }}</p>
+                    <div class="flex items-center gap-4 text-xs text-gray-500">
+                      <span><i class="fas fa-calendar mr-1"></i>Due: {{ formatDate(subAction.dueDate) }}</span>
+                      <span><i class="fas fa-clock mr-1"></i>Created: {{ formatDate(subAction.createdAt) }}</span>
+                      <span><i class="fas fa-edit mr-1"></i>Updated: {{ formatDateTime(subAction.updatedAt) }}</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Sub-Action Advance Button -->
+                  <div>
+                    <button
+                      *ngIf="canAdvanceSubActionStatus(subAction.status)"
+                      (click)="advanceSubActionStatus(action, subAction)"
+                      class="px-3 py-1 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg font-medium text-sm transition-all duration-300 hover:scale-105"
+                      title="Advance to {{ getNextStatus(subAction.status) }}">
+                      <i class="fas fa-arrow-right mr-1"></i>
+                      {{ getNextStatus(subAction.status) }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="filteredActions.length === 0" class="text-center py-16">
+          <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-search text-gray-400 text-3xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-600 mb-2">No actions found</h3>
+          <p class="text-gray-500 mb-6">Try adjusting your filters or search criteria to find more actions.</p>
+          <button (click)="clearFilters()" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-medium transition-colors">
+            <i class="fas fa-refresh mr-2"></i> Clear All Filters
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Styled Confirmation Dialog -->
+    <div *ngIf="showConfirmDialog" class="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+      <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+        <!-- Confirmation Header -->
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white">
+          <div class="flex items-center">
+            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+              <i class="fas fa-question-circle"></i>
+            </div>
+            <h3 class="text-xl font-bold">Confirm Status Change</h3>
+          </div>
+        </div>
+
+        <!-- Confirmation Body -->
+        <div class="p-6">
+          <div class="mb-6 p-4 bg-orange-50 rounded-xl border border-orange-200">
+            <div class="flex items-start text-orange-700">
+              <i class="fas fa-info-circle mr-3 text-xl flex-shrink-0 mt-0.5"></i>
+              <p class="font-medium leading-relaxed">{{ confirmMessage }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confirmation Actions -->
+        <div class="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
+          <button
+            (click)="closeConfirmDialog()"
+            class="flex-1 px-6 py-3 text-sm font-bold text-gray-700 bg-white hover:bg-gray-100 rounded-xl border-2 border-gray-200 transition-all duration-300">
+            <i class="fas fa-times mr-2"></i> Cancel
+          </button>
+          <button
+            (click)="confirmStatusChange()"
+            class="flex-1 px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-xl transition-all duration-300">
+            <i class="fas fa-check mr-2"></i> Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

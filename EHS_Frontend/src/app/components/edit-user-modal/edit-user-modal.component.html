@@ -1,0 +1,443 @@
+<!-- Modal Backdrop with Blur Effect -->
+<div *ngIf="show" class="modal-backdrop" (click)="onBackdropClick($event)">
+  
+  <!-- Modal Container -->
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 mr-3">
+          <!-- User Avatar -->
+          <div class="relative">
+            <img *ngIf="avatarPreview; else defaultAvatar"
+                 [src]="avatarPreview"
+                 [alt]="user?.fullName + ' avatar'"
+                 class="h-10 w-10 rounded-full object-cover ring-2 ring-gray-200">
+            <ng-template #defaultAvatar>
+              <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                {{ getUserInitials() }}
+              </div>
+            </ng-template>
+          </div>
+        </div>
+        <div>
+          <h3>{{ title }}</h3>
+          <p class="text-xs text-gray-600 mt-1">Update profile information</p>
+        </div>
+      </div>
+      <button type="button" class="close-btn" (click)="onClose()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <form (ngSubmit)="onSubmit()" class="modal-body">
+      
+      <!-- Error Message -->
+      <div *ngIf="error" class="error-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ error }}
+      </div>
+      
+      <!-- Readonly Information Section -->
+      <div class="readonly-section">
+        <h4>Account Information (Read-only)</h4>
+        <div class="readonly-grid">
+          <div class="readonly-item">
+            <label>Company ID</label>
+            <div class="value">{{ user?.companyId || 'N/A' }}</div>
+          </div>
+          <div class="readonly-item">
+            <label>Email</label>
+            <div class="value">{{ user?.email || 'N/A' }}</div>
+          </div>
+          
+          <div class="readonly-item">
+            <label>Role</label>
+            <div class="value">
+              <i class="fas fa-user-shield text-red-500 mr-1" *ngIf="user?.role === 'Admin'" title="Admin"></i>
+              <i class="fas fa-hard-hat text-yellow-500 mr-1" *ngIf="user?.role === 'HSE'" title="HSE"></i>
+              <i class="fas fa-user text-blue-500 mr-1" *ngIf="user?.role === 'Profil'" title="Profile"></i>
+              {{ user?.role || 'N/A' }}
+            </div>
+          </div>
+          <div class="readonly-item">
+            <label>Account Created</label>
+            <div class="value">{{ formatAccountCreated() }}</div>
+          </div>
+          <div class="readonly-item">
+            <label>Last Login</label>
+            <div class="value">{{ getLastLoginFormatted() }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full Name Field -->
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="fullName"
+          name="fullName"
+          placeholder="Enter full name"
+          required>
+        <div *ngIf="formErrors['fullName']" class="field-error">
+          {{ formErrors['fullName'] }}
+        </div>
+      </div>
+
+      <!-- Date of Birth Field -->
+      <div class="form-group">
+        <label>Date of Birth</label>
+        <input 
+          type="date" 
+          [(ngModel)]="dateOfBirth"
+          name="dateOfBirth">
+        <div *ngIf="formErrors['dateOfBirth']" class="field-error">
+          {{ formErrors['dateOfBirth'] }}
+        </div>
+      </div>
+
+      <!-- Position Field -->
+      <div class="form-group">
+        <label>Position</label>
+        <input 
+          type="text" 
+          [(ngModel)]="position"
+          name="position"
+          placeholder="Enter position (e.g., Safety Manager, Inspector)">
+        <div *ngIf="formErrors['position']" class="field-error">
+          {{ formErrors['position'] }}
+        </div>
+      </div>
+
+      <!-- Department Field -->
+      <div class="form-group">
+        <label>Department</label>
+        <input 
+          type="text" 
+          [(ngModel)]="department"
+          name="department"
+          placeholder="Enter department (e.g., Safety, Operations)">
+        <div *ngIf="formErrors['department']" class="field-error">
+          {{ formErrors['department'] }}
+        </div>
+      </div>
+
+      <!-- Avatar Upload Field -->
+      <div class="form-group">
+        <label>Profile Picture</label>
+        <div class="avatar-upload">
+          <div class="avatar-preview-container">
+            <img *ngIf="avatarPreview; else defaultAvatarSmall"
+                 [src]="avatarPreview"
+                 [alt]="fullName + ' avatar'"
+                 class="avatar-preview">
+            <ng-template #defaultAvatarSmall>
+              <div class="avatar-placeholder">
+                {{ getUserInitials() }}
+              </div>
+            </ng-template>
+          </div>
+          <div class="avatar-controls">
+            <input 
+              type="file" 
+              id="avatar"
+              accept="image/*"
+              (change)="onAvatarSelected($event)"
+              class="file-input">
+            <label for="avatar" class="file-input-button">
+              <i class="fas fa-upload mr-2"></i>Choose File
+            </label>
+            
+          </div>
+        </div>
+        <div class="file-info">
+          Supported: JPG, PNG, GIF (max 2MB)
+        </div>
+        <div *ngIf="formErrors['avatar']" class="field-error">
+          {{ formErrors['avatar'] }}
+        </div>
+      </div>
+
+      <!-- Password Change Section (only for Admin and HSE users) -->
+      <div *ngIf="user?.role !== 'Profil'" class="password-section">
+        <div class="password-header">
+          <label>Change Password</label>
+          <button 
+            type="button"
+            (click)="togglePasswordSection()"
+            class="password-toggle">
+            {{ showPasswordSection ? 'Cancel Password Change' : 'Change Password' }}
+          </button>
+        </div>
+
+        <div *ngIf="showPasswordSection" class="password-fields">
+
+          <!-- New Password -->
+          <div class="form-group">
+            <label>New Password *</label>
+            <input 
+              type="password" 
+              [(ngModel)]="newPassword"
+              name="newPassword"
+              placeholder="Enter new password"
+              autocomplete="new-password">
+            <div *ngIf="formErrors['newPassword']" class="field-error">
+              {{ formErrors['newPassword'] }}
+            </div>
+            <div class="field-hint">
+              Password must be at least 6 characters long
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="form-group">
+            <label>Confirm New Password *</label>
+            <input 
+              type="password" 
+              [(ngModel)]="confirmPassword"
+              name="confirmPassword"
+              placeholder="Confirm new password"
+              autocomplete="new-password">
+            <div *ngIf="formErrors['confirmPassword']" class="field-error">
+              {{ formErrors['confirmPassword'] }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zone Management Section (only for Admin users editing HSE users) -->
+      <div *ngIf="showZoneSection" class="zone-section">
+        <h4><i class="fas fa-map-marked-alt mr-2"></i>Zone Management</h4>
+        
+        <!-- Zone Assignment -->
+        <div class="zone-assignment">
+          <div class="section-header">
+            <h5>Assigned Zones</h5>
+            <div class="zone-assign-controls">
+              <select [(ngModel)]="selectedZoneId" name="selectedZone" class="zone-select">
+                <option value="">Select a zone to assign</option>
+                <option *ngFor="let zone of getAvailableZonesForAssignment()" [value]="zone.id">
+                  {{ zone.name }} ({{ zone.code }})
+                </option>
+              </select>
+              <button 
+                type="button" 
+                (click)="onAssignZone()" 
+                [disabled]="!selectedZoneId"
+                class="btn-assign-zone">
+                <i class="fas fa-plus mr-1"></i>Assign
+              </button>
+            </div>
+          </div>
+
+          <!-- Assigned Zones List -->
+          <div class="zones-list">
+            <div *ngIf="userZones.length === 0" class="no-zones">
+              <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+              No zones assigned to this HSE user yet.
+            </div>
+            <div *ngFor="let zone of userZones" class="zone-item">
+              <div class="zone-info">
+                <div class="zone-name">
+                  <i class="fas fa-map-marker-alt text-green-500 mr-2"></i>
+                  {{ zone.zoneName }}
+                </div>
+                <div class="zone-details">
+                  <span class="zone-code">{{ zone.zoneCode }}</span>
+                  <span class="zone-date">Assigned: {{ zone.assignedAt | date:'short' }}</span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                (click)="onRemoveZone(zone.zoneId)"
+                class="btn-remove-zone"
+                title="Remove zone assignment">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone Delegations -->
+        <div class="zone-delegations">
+          <div class="section-header">
+            <h5>Zone Delegations</h5>
+            <button 
+              type="button" 
+              (click)="onCreateDelegation()"
+              [disabled]="userZones.length === 0"
+              class="btn-create-delegation">
+              <i class="fas fa-user-plus mr-1"></i>Create Delegation
+            </button>
+          </div>
+
+          <!-- Create Delegation Form -->
+          <div *ngIf="showCreateDelegation" class="delegation-form">
+            <h6>Create New Delegation</h6>
+            <div class="delegation-form-grid">
+              <div class="form-group">
+                <label>Delegate To *</label>
+                <select [(ngModel)]="delegationForm.toHSEUserId" name="delegateToUser" required>
+                  <option value="">Select HSE user</option>
+                  <option *ngFor="let hseUser of getHSEUsersForDelegation()" [value]="hseUser.id">
+                    {{ hseUser.fullName }} ({{ hseUser.email }})
+                  </option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label>Zone *</label>
+                <select [(ngModel)]="delegationForm.zoneId" name="delegationZone" required>
+                  <option [value]="null">Select zone</option>
+                  <option *ngFor="let zone of getUserZonesForDelegation()" [value]="zone.zoneId">
+                    {{ zone.zoneName }} ({{ zone.zoneCode }})
+                  </option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label>Start Date *</label>
+                <input 
+                  type="date" 
+                  [(ngModel)]="delegationForm.startDate"
+                  name="delegationStartDate"
+                  required>
+              </div>
+              
+              <div class="form-group">
+                <label>End Date *</label>
+                <input 
+                  type="date" 
+                  [(ngModel)]="delegationForm.endDate"
+                  name="delegationEndDate"
+                  required>
+              </div>
+              
+              <div class="form-group form-group-full">
+                <label>Reason</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="delegationForm.reason"
+                  name="delegationReason"
+                  placeholder="e.g., Vacation, Sick leave, Training">
+              </div>
+            </div>
+            
+            <div class="delegation-form-actions">
+              <button type="button" (click)="onCancelDelegation()" class="btn-cancel-delegation">
+                Cancel
+              </button>
+              <button 
+                type="button" 
+                (click)="onSubmitDelegation()"
+                [disabled]="!delegationForm.toHSEUserId || !delegationForm.zoneId || !delegationForm.startDate || !delegationForm.endDate"
+                class="btn-submit-delegation">
+                Create Delegation
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Delegations List -->
+          <div class="delegations-list">
+            <div *ngIf="zoneDelegations.length === 0" class="no-delegations">
+              <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+              No active delegations for this HSE user.
+            </div>
+            <div *ngFor="let delegation of zoneDelegations" class="delegation-item">
+              <div class="delegation-info">
+                <div class="delegation-header">
+                  <span class="delegation-zone">
+                    <i class="fas fa-exchange-alt text-orange-500 mr-1"></i>
+                    {{ delegation.zoneName }} ({{ delegation.zoneCode }})
+                  </span>
+                  <span class="delegation-status" [class.active]="delegation.isActive" [class.inactive]="!delegation.isActive">
+                    {{ delegation.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+                <div class="delegation-details">
+                  <div class="delegation-users">
+                    <span class="from-user">From: {{ delegation.fromHSEUserName }}</span>
+                    <i class="fas fa-arrow-right mx-2 text-gray-400"></i>
+                    <span class="to-user">To: {{ delegation.toHSEUserName }}</span>
+                  </div>
+                  <div class="delegation-dates">
+                    {{ delegation.startDate | date:'shortDate' }} - {{ delegation.endDate | date:'shortDate' }}
+                  </div>
+                  <div *ngIf="delegation.reason" class="delegation-reason">
+                    Reason: {{ delegation.reason }}
+                  </div>
+                </div>
+              </div>
+              <button 
+                *ngIf="delegation.isActive"
+                type="button" 
+                (click)="onEndDelegation(delegation.id)"
+                class="btn-end-delegation"
+                title="End delegation">
+                <i class="fas fa-stop"></i> End
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="onClose()">
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          class="btn-submit"
+          [disabled]="isLoading">
+          <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+          {{ isLoading ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+      
+    </form>
+  </div>
+</div>
+
+<!-- Custom Alert Modal -->
+<div *ngIf="showAlert" class="modal-backdrop" (click)="closeAlert()">
+  <div class="alert-modal" (click)="$event.stopPropagation()">
+    <div class="alert-header" [ngClass]="'alert-' + alertConfig.type">
+      <div class="alert-icon">
+        <span *ngIf="alertConfig.type === 'success'">✓</span>
+        <span *ngIf="alertConfig.type === 'error'">✕</span>
+        <span *ngIf="alertConfig.type === 'warning'">⚠</span>
+        <span *ngIf="alertConfig.type === 'info'">ℹ</span>
+      </div>
+      <h4>{{ alertConfig.title }}</h4>
+    </div>
+    <div class="alert-body">
+      <p>{{ alertConfig.message }}</p>
+    </div>
+    <div class="alert-footer">
+      <button class="btn-submit" (click)="closeAlert()">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Confirmation Modal -->
+<div *ngIf="showConfirm" class="modal-backdrop" (click)="onCancelAction()">
+  <div class="confirm-modal" (click)="$event.stopPropagation()">
+    <div class="confirm-header">
+      <div class="confirm-icon">
+        <span>?</span>
+      </div>
+      <h4>{{ confirmConfig.title }}</h4>
+    </div>
+    <div class="confirm-body">
+      <p>{{ confirmConfig.message }}</p>
+    </div>
+    <div class="confirm-footer">
+      <button class="btn-cancel" (click)="onCancelAction()">{{ confirmConfig.cancelText }}</button>
+      <button class="btn-submit" (click)="onConfirmAction()">{{ confirmConfig.confirmText }}</button>
+    </div>
+  </div>
+</div>
