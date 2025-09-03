@@ -1,0 +1,38 @@
+/* ✅ Animations */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animated-card {
+  transition: all 0.3s ease;
+}
+
+  .animated-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+/* ✅ Chart container heights */
+#bodyPartChart,
+#zoneChart,
+#shiftChart,
+#trendChart {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}

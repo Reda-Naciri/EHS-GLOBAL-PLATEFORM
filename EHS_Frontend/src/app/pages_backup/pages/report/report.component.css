@@ -1,0 +1,15 @@
+.human-body {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+  .human-body svg {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 100%;
+    height: auto;
+  }
+
+/* Le reste (hover, selected, positions spécifiques) reste inchangé */

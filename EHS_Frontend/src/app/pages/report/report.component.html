@@ -1,0 +1,361 @@
+<div class="min-h-screen flex flex-col items-center bg-gradient-to-br from-[#e2e2e2] to-[#ECECEC] py-10 relative overflow-hidden">
+  <!-- Back to Home Button -->
+  <div class="back-to-home">
+    <button (click)="goHome()" class="home-btn">
+      <span class="home-icon">←</span> Back to Home
+    </button>
+  </div>
+  
+  <!-- Header Section -->
+  <div class="w-full py-6 flex justify-center">
+    <img src="https://www.fclane.com/sites/default/files/partner_logos/polamcote-logo2.png"
+         alt="TE Connectivity Logo" class="h-24 md:h-32 lg:h-40">
+  </div>
+
+  <!-- Main Content Container -->
+  <div class="container mx-auto bg-white shadow-xl rounded-lg p-8 w-full max-w-4xl">
+
+    <!-- Title Section -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6 rounded-md mb-8">
+      <div class="flex items-center">
+        <i class="fas fa-clipboard-check text-4xl mr-4"></i>
+        <div>
+          <h1 class="text-3xl font-bold">{{ reportTitle }}</h1>
+          <p class="opacity-90 mt-1">Comprehensive reporting for workplace</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerts now handled by global AlertContainerComponent -->
+
+    <form class="space-y-6" #incidentForm="ngForm">
+      <!-- Reporter Information -->
+      <div class="bg-blue-50 p-5 rounded-lg border border-blue-100">
+        <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center">
+          <i class="fas fa-user-circle mr-3"></i>Reporter Information
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Reporter ID*</label>
+            <input type="text" 
+                   [(ngModel)]="reportForm.reporterId"
+                   name="reporterId"
+                   (input)="onReporterIdInput(); onFieldInput('reporterId')"
+                   (blur)="validateCompanyId()"
+                   placeholder="Enter your company ID"
+                   required 
+                   [class]="getFieldClass('reporterId')">
+            <!-- Single validation indicator -->
+            <div class="text-sm mt-1" *ngIf="shouldShowValidationMessage()">
+              <div *ngIf="companyIdValidating" class="text-blue-600">
+                <i class="fas fa-spinner fa-spin mr-1"></i>Validating...
+              </div>
+              <div *ngIf="!companyIdValidating && companyIdValid" class="text-green-600">
+                <i class="fas fa-check mr-1"></i>Valid Company ID - {{reporterInfo?.reporterName}}
+              </div>
+              <div *ngIf="!companyIdValidating && !companyIdValid" class="text-red-600">
+                <i class="fas fa-times mr-1"></i>Invalid Company ID
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Work Shift*</label>
+            <select [(ngModel)]="reportForm.workShift"
+                    name="workShift"
+                    (change)="onFieldInput('workShift')"
+                    required 
+                    [class]="getFieldClass('workShift')">
+              <option value="">Select shift</option>
+              <option *ngFor="let shift of shifts" [value]="shift.name">{{shift.name}}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Incident Details -->
+      <div class="bg-yellow-50 p-5 rounded-lg border border-yellow-100">
+        <h2 class="text-xl font-semibold text-yellow-800 mb-4 flex items-center">
+          <i class="fas fa-exclamation-triangle mr-3"></i>Details
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Title*</label>
+            <input type="text" 
+                   [(ngModel)]="reportForm.title"
+                   name="title"
+                   (input)="onFieldInput('title')"
+                   required 
+                   [class]="getFieldClass('title')">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Zone*</label>
+            <select [(ngModel)]="reportForm.zone"
+                    name="zone"
+                    (change)="onFieldInput('zone')"
+                    required 
+                    [class]="getFieldClass('zone')">
+              <option value="">Select zone</option>
+              <option *ngFor="let zone of zones" [value]="zone.name">{{zone.name}}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time*</label>
+            <input type="datetime-local" 
+                   [(ngModel)]="reportForm.incidentDateTime"
+                   name="incidentDateTime"
+                   (change)="onFieldInput('incidentDateTime')"
+                   required 
+                   [class]="getFieldClass('incidentDateTime')">
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description*</label>
+          <textarea rows="4" 
+                    [(ngModel)]="reportForm.description"
+                    name="description"
+                    (input)="onFieldInput('description')"
+                    required 
+                    [class]="getFieldClass('description')"></textarea>
+        </div>
+
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Attachments</label>
+          
+          <!-- Hidden file input -->
+          <input #fileInput
+                 type="file" 
+                 (change)="onFileSelect($event)"
+                 multiple
+                 accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+                 class="hidden">
+          
+          <!-- Custom file upload button -->
+          <button type="button"
+                  (click)="fileInput.click()"
+                  class="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors flex items-center justify-center space-x-2">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Choose Files to Upload</span>
+          </button>
+          
+          <p class="text-xs text-gray-500 mt-1">Supported formats: JPG, PNG, PDF, DOC, XLS, TXT, CSV</p>
+          
+          <!-- File preview section -->
+          <div *ngIf="reportForm.attachments.length > 0" class="mt-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Selected Files ({{ reportForm.attachments.length }})</h4>
+            <div class="space-y-2">
+              <div *ngFor="let file of reportForm.attachments; let i = index" 
+                   class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                <div class="flex items-center space-x-3">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-file text-gray-400"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ file.name }}</p>
+                    <p class="text-xs text-gray-500">{{ getFileSize(file) }}</p>
+                  </div>
+                </div>
+                <button type="button" 
+                        (click)="removeAttachment(i)"
+                        class="flex-shrink-0 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                        title="Remove file">
+                  <i class="fas fa-times text-sm"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Injured Persons (only for Incident Management Report) -->
+      <div *ngIf="reportType === 'Incident-Management'" class="bg-red-50 p-5 rounded-lg border border-red-100">
+        <h2 class="text-xl font-semibold text-red-800 mb-4 flex items-center">
+          <i class="fas fa-user-injured mr-3"></i>Injured Persons
+        </h2>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Number of Injured Persons*</label>
+          <select name="injuredCount"
+                  [(ngModel)]="injuredCount"
+                  (change)="onInjuredCountChange(injuredCount)"
+                  class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+
+        </div>
+
+        <div *ngFor="let person of injuredPersons; let i = index" class="bg-white p-5 rounded-lg border border-red-200 mb-6">
+          <h3 class="font-medium text-lg text-red-700 mb-4">Injured Person #{{ i + 1 }}</h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Name*</label>
+              <input [(ngModel)]="person.name" name="name{{i}}" type="text" (input)="onInjuredPersonFieldInput(i, 'name')" required [class]="getInjuredPersonFieldClass(i, 'name')">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+              <select [(ngModel)]="person.department" 
+                      name="department{{i}}" 
+                      (change)="onInjuredPersonFieldInput(i, 'department')"
+                      required 
+                      [class]="getInjuredPersonFieldClass(i, 'department')">
+                <option value="">Select department</option>
+                <option *ngFor="let dept of departments" [value]="dept.name">{{dept.name}}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Zone of Person</label>
+              <select [(ngModel)]="person.zoneOfPerson" 
+                      name="zoneOfPerson{{i}}" 
+                      (change)="onInjuredPersonFieldInput(i, 'zoneOfPerson')"
+                      required 
+                      [class]="getInjuredPersonFieldClass(i, 'zoneOfPerson')">
+                <option value="">Select zone</option>
+                <option *ngFor="let zone of zones" [value]="zone.name">{{zone.name}}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+              <select [(ngModel)]="person.gender" name="gender{{i}}" (change)="onInjuredPersonFieldInput(i, 'gender')" required [class]="getInjuredPersonFieldClass(i, 'gender')">
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+                <option value="Prefer not to say">Prefer not to say</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bg-white border border-gray-300 shadow-md rounded-lg p-4 my-6 w-full max-w-3xl mx-auto">
+
+            <!-- Titre -->
+            <h2 class="text-lg font-semibold mb-0 text-center text-blue-800">Select Injured Body Part</h2>
+
+            <!-- CORPS -->
+            <div class="flex justify-center" style="height: 300px; position: relative;">
+              <div style="transform: scale(0.8); transform-origin: top center; width: 100%; height: 100%;">
+                <app-body-map (bodyPartSelected)="person.selectedBodyPart = $event"></app-body-map>
+              </div>
+            </div>
+
+            <!-- Texte Selected -->
+            <div class="mt-1 text-center text-gray-700 text-sm">
+              Selected: <span class="font-semibold">{{ person.selectedBodyPart || 'None' }}</span>
+            </div>
+
+          </div>
+
+
+          <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Injury Type</label>
+              <select [(ngModel)]="person.injuryType" 
+                      name="injuryType{{i}}" 
+                      class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                <option value="">Select injury type</option>
+                <option *ngFor="let fracture of fractureTypes" [value]="fracture.name">{{fracture.name}}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Severity</label>
+              <select [(ngModel)]="person.severity" name="severity{{i}}" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                <option value="">Select severity</option>
+                <option value="low">Minor</option>
+                <option value="medium">Moderate</option>
+                <option value="high">Severe</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea [(ngModel)]="person.description" name="description{{i}}" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+
+          <div class="mt-4 flex justify-end">
+            <button type="button" (click)="addInjury(i)" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium">
+              <i class="fas fa-plus mr-2"></i>Add Injury
+            </button>
+          </div>
+
+          <div *ngIf="person.injuries.length > 0" class="mt-4">
+            <h4 class="font-semibold mb-2">Documented Injuries:</h4>
+            <ul class="list-disc ml-6 space-y-1">
+              <li *ngFor="let injury of person.injuries">
+                {{ injury.bodyPart }} - {{ injury.severity | titlecase }} - {{ injury.description }}
+                <button type="button" (click)="removeInjury(i, injury.id)" class="text-red-600 ml-2 hover:underline">Remove</button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions Taken -->
+      <div class="bg-green-50 p-5 rounded-lg border border-green-100">
+        <h2 class="text-xl font-semibold text-green-800 mb-4 flex items-center">
+          <i class="fas fa-tasks mr-3"></i>Actions Taken
+        </h2>
+
+        <div class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Immediate Actions Taken</label>
+            <textarea rows="3" 
+                      [(ngModel)]="reportForm.immediateActionsTaken"
+                      name="immediateActionsTaken"
+                      required 
+                      class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Action Status</label>
+            <select [(ngModel)]="reportForm.actionStatus"
+                    name="actionStatus"
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+              <option value="Not Started">Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Person in Charge of Actions</label>
+              <input type="text" 
+                     [(ngModel)]="reportForm.personInChargeOfActions"
+                     name="personInChargeOfActions"
+                     required 
+                     class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Date Actions Completed</label>
+              <input type="date" 
+                     [(ngModel)]="reportForm.dateActionsCompleted"
+                     name="dateActionsCompleted"
+                     class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Submission -->
+      <div class="flex justify-end gap-4 pt-4">
+        <button type="button" 
+                (click)="resetForm()"
+                class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium">
+          <i class="fas fa-redo mr-2"></i>Reset
+        </button>
+        <button type="submit" 
+                (click)="submitReport()"
+                [disabled]="loading || !companyIdValid"
+                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:bg-gray-400 disabled:cursor-not-allowed">
+          <i class="fas fa-spinner fa-spin mr-2" *ngIf="loading"></i>
+          <i class="fas fa-paper-plane mr-2" *ngIf="!loading"></i>
+          {{loading ? 'Submitting...' : 'Submit Report'}}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

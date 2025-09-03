@@ -1,0 +1,61 @@
+<div class="dashboard-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex items-center justify-center h-64">
+    <div class="text-lg">Loading dashboard...</div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="flex items-center justify-center h-64">
+    <div class="text-red-500 text-lg">{{ error }}</div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="dashboard-content" *ngIf="!loading && !error">
+
+    <!-- Main Section (Left: Reports & KPIs | Right: Recent Reports) -->
+    <div class="dashboard-body">
+      <!-- 🔹 LEFT SECTION (Reports, Incident Management & KPIs) -->
+      <div class="dashboard-left">
+        <!-- Section for Reports & Incident Management -->
+        <div class="cards-container">
+          <div class="dashboard-card reports-card" routerLink="/reports">
+            <h3 class="card-title">Reports</h3>
+            <div class="incident-count">{{ totalReports }}</div> <!-- Placeholder number -->
+          </div>
+          <!-- Incident Management Card -->
+          <div class="dashboard-card incident-card" routerLink="/incident-dashboard">
+            <h3 class="card-title">Incident Management</h3>
+            <div class="incident-count">{{ incidentManagementCount }}</div> <!-- Placeholder number -->
+          </div>
+        </div>
+        <!-- KPI Placeholder (Power BI to be added later) -->
+        <div class="kpi-placeholder">
+          <img src="https://hsefiles.com/wp-content/uploads/2022/03/HSE-KPI-Dashboard-New.jpg" alt="KPI Placeholder">
+        </div>
+      </div>
+
+      <div class="dashboard-right">
+        <h2 class="text-lg font-bold mb-4">Recent Reports</h2>
+        <div class="reports-container space-y-4">
+          <div *ngFor="let report of displayedReports" class="report-card flex gap-4 items-start">
+            <span class="report-icon text-2xl">{{ getIcon(report.type) }}</span>
+            <div class="report-info">
+              <p><strong>{{ report.title }}</strong></p>
+              <p class="subtext text-sm text-gray-500">
+                By {{ getUserName(report.reporterId) }} · {{ report.createdAt | date: 'dd/MM/yyyy' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Voir Plus / Voir Moins -->
+        <div class="mt-4 text-center">
+          <button class="text-blue-600 hover:underline font-medium" (click)="toggleShowMore()">
+            {{ showAllReports ? 'Voir moins' : 'Voir plus' }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

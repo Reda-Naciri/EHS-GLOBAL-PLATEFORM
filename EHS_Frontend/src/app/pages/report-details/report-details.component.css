@@ -1,0 +1,432 @@
+/* Back to Home Button */
+.back-to-home {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
+.home-btn {
+  background: #E98300;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(233, 131, 0, 0.3);
+}
+
+.home-btn:hover {
+  background: #cc7400;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(233, 131, 0, 0.4);
+}
+
+.home-icon {
+  font-size: 16px;
+  line-height: 1;
+  color: white;
+  font-weight: bold;
+}
+
+.report-details-wrapper {
+  margin-top: 50px; /* adapte à la hauteur réelle de ta navbar */
+  margin-left: 0px; /* adapte à la largeur de la sidebar */
+  padding: 24px;
+  width: calc(100% - 0px);
+  box-sizing: border-box;
+}
+
+.status-in-progress {
+  animation: pulse 2s infinite;
+}
+
+.status-not-started {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+
+.status-in-progress {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.status-completed {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.subaction-item {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.subaction-dot {
+  position: absolute;
+  left: 0.5rem;
+  top: 1rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: #3b82f6;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Abort Message Styles */
+.abort-message-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.abort-message-content {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 500px;
+  width: 90%;
+  animation: slideInScale 0.4s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.abort-message-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  animation: progressBar 3s ease-out;
+}
+
+.abort-message-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.abort-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  margin-right: 16px;
+  animation: bounceIn 0.6s ease-out;
+}
+
+.abort-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.abort-description {
+  color: #6b7280;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.abort-reason-box {
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  animation: highlightReason 0.5s ease-out 0.3s both;
+}
+
+.abort-reason-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.abort-reason-text {
+  font-size: 16px;
+  color: #1f2937;
+  font-style: italic;
+}
+
+.abort-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.abort-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.abort-btn-cancel {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.abort-btn-cancel:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.abort-btn-confirm {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.abort-btn-confirm:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.abort-btn-confirm:active {
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes progressBar {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes highlightReason {
+  from {
+    background: #f9fafb;
+    border-color: #d1d5db;
+  }
+  to {
+    background: #fef3f2;
+    border-color: #fca5a5;
+  }
+}
+
+/* Success animation for when action is aborted */
+.abort-success {
+  animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+  0% {
+    background: #fef3f2;
+  }
+  50% {
+    background: #dcfce7;
+  }
+  100% {
+    background: #fef3f2;
+  }
+}
+
+/* Mobile responsive for corrective actions - targeting Tailwind classes */
+@media screen and (max-width: 768px) {
+  .report-details-wrapper {
+    margin-top: 70px;
+    margin-left: 0;
+    padding: 15px;
+    width: 100%;
+  }
+  
+  /* Corrective actions container - reduce padding */
+  .bg-white.rounded-xl.shadow-md.overflow-hidden.mb-8 {
+    margin-bottom: 20px !important;
+    border-radius: 12px !important;
+  }
+  
+  /* Action cards - reduce padding and improve spacing */
+  .p-6.action-card.border-l-4.bg-white.rounded-lg.shadow-sm {
+    padding: 16px !important;
+    margin-bottom: 20px !important;
+    border-radius: 8px !important;
+  }
+  
+  /* Action header section - reduce spacing */
+  .flex.justify-between.items-start.mb-4 {
+    margin-bottom: 16px !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  
+  /* Action title - reduce font size */
+  .text-lg.font-semibold.text-gray-800.flex.items-center {
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+  }
+  
+  /* Action details grid - stack vertically */
+  .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3.gap-4.text-sm {
+    display: block !important;
+    gap: 0 !important;
+  }
+  
+  .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3.gap-4.text-sm > div {
+    margin-bottom: 12px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3.gap-4.text-sm > div:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  
+  /* Detail grid items - vertical spacing */
+  .space-y-2 {
+    gap: 8px !important;
+  }
+  
+  .space-y-2 > * + * {
+    margin-top: 8px !important;
+  }
+  
+  /* Action buttons container - stack vertically */
+  .flex.justify-between.items-center.pt-4.border-t.border-gray-200 {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding-top: 16px !important;
+  }
+  
+  /* Progress bar section */
+  .flex.items-center.space-x-3 {
+    justify-content: center !important;
+    margin-bottom: 8px !important;
+  }
+  
+  /* Button spacing */
+  .flex.space-x-2 {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  .flex.space-x-2 > * {
+    margin-right: 0 !important;
+  }
+  
+  /* Reduce badge sizes */
+  .px-3.py-1.text-xs.font-semibold.uppercase.tracking-wide.rounded-full {
+    font-size: 10px !important;
+    padding: 4px 8px !important;
+  }
+  
+  .text-xs.px-2.py-1.rounded-full {
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+  }
+  
+  /* Action description text */
+  .mt-2.text-sm.text-gray-600 {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    margin-top: 8px !important;
+  }
+  
+  /* Background sections - reduce padding */
+  .mt-4.bg-gray-50.p-4.rounded-lg {
+    padding: 12px !important;
+    margin-top: 12px !important;
+  }
+}
+
+

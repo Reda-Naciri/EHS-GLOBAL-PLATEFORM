@@ -1,0 +1,133 @@
+<div class="container mx-auto px-4 py-8 mt-15">
+  <!-- Header -->
+  <header class="mb-8">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800">Incident Management Dashboard</h1>
+        <p class="text-gray-600">Body Part Injuries Analysis</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="relative">
+          <select class="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-8 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option>Last 7 Days</option>
+            <option selected>Last 30 Days</option>
+            <option>Last 90 Days</option>
+            <option>This Year</option>
+            <option>Custom Range</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <i class="fas fa-chevron-down"></i>
+          </div>
+        </div>
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center">
+          <i class="fas fa-download mr-2"></i> Export
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <ng-container *ngFor="let card of kpiCards">
+      <div class="bg-white rounded-lg shadow-md p-6 animated-card fade-in">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-500 text-sm font-medium">{{ card.label }}</p>
+            <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ card.value }}</h3>
+            <p [ngClass]="card.trendClass + ' text-sm mt-1'">
+              <i class="fas" [ngClass]="card.trendIcon + ' mr-1'"></i>{{ card.trend }}
+            </p>
+          </div>
+          <div [ngClass]="card.iconBg" class="p-3 rounded-full">
+            <i class="fas" [ngClass]="card.icon + ' text-xl'" [ngStyle]="{ color: card.iconColor }"></i>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Charts -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-md p-6 col-span-1 animated-card">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Body Part Distribution</h2>
+      <div class="h-[300px]">
+        <canvas id="bodyPartChart" style="height:100%; width:100%;"></canvas>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6 col-span-1 animated-card">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Incidents by Zone</h2>
+      <div class="h-[300px]">
+        <canvas id="zoneChart" style="height:100%; width:100%;"></canvas>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6 col-span-1 animated-card">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Incidents by Shift</h2>
+      <div class="h-[300px]">
+        <canvas id="shiftChart" style="height:100%; width:100%;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trend Chart -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8 animated-card">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold text-gray-800">Monthly Incident Trend</h2>
+      <div class="flex space-x-2">
+        <button class="px-3 py-1 bg-blue-100 text-blue-600 rounded-md text-sm">Body Parts</button>
+        <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-sm">Zones</button>
+        <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-sm">Shifts</button>
+      </div>
+    </div>
+    <div class="h-[350px]">
+      <canvas id="trendChart" style="height:100%; width:100%;"></canvas>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-lg shadow-md p-6 animated-card">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold text-gray-800">Incident Details</h2>
+      <button class="text-blue-600 hover:text-blue-800 flex items-center">
+        <i class="fas fa-filter mr-1"></i> Filter
+      </button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Report ID</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Zone</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Severity</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let report of incidentReports">
+            <td class="px-6 py-4 text-sm text-gray-500">
+              {{ report.situationDateTime | date: 'dd/MM/yyyy' }}
+            </td>
+            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ report.id }}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">{{ report.zone }}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">{{ report.shift }}</td>
+            <td class="px-6 py-4">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                    [ngClass]="{
+        'bg-red-100 text-red-800': report.severity === 'Severe',
+        'bg-yellow-100 text-yellow-800': report.severity === 'Moderate',
+        'bg-green-100 text-green-800': report.severity === 'Minor'
+      }">
+                {{ report.severity }}
+              </span>
+
+            </td>
+            <td class="px-6 py-4 text-right text-sm font-medium">
+              <a [routerLink]="['/reports', report.id]" class="text-blue-600 hover:text-blue-900">View</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

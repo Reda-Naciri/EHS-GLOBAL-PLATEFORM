@@ -1,0 +1,23 @@
+<!-- Shared Alert Component -->
+<div *ngIf="message" 
+     [class]="getAlertClasses()">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center">
+      <i [class]="getIconClass()"></i>
+      <span [class]="getTextClass()">{{ message }}</span>
+    </div>
+    <button *ngIf="allowClose"
+      (click)="onClose()" 
+      [class]="getCloseButtonClass()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <!-- Progress bar showing auto-hide timer -->
+  <div *ngIf="showProgressBar && autoHide" [class]="getProgressBarClasses()">
+    <div [class]="getProgressBarFillClasses()" 
+         [ngStyle]="{
+           'animation-duration': getAnimationDuration(), 
+           'animation-iteration-count': '1'
+         }"></div>
+  </div>
+</div>

@@ -1,0 +1,76 @@
+/* Shared Alert Component Styles */
+
+/* Ensure proper z-index for alerts */
+.fixed {
+  z-index: 9999;
+}
+
+/* Custom animation for progress bar */
+@keyframes progressBarAnimation {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.animate-pulse {
+  animation: progressBarAnimation linear;
+}
+
+/* Ensure FontAwesome icons display properly */
+.fas {
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900 !important;
+  font-style: normal !important;
+  display: inline-block;
+}
+
+/* Smooth transitions */
+.transform {
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Icon hover effects */
+.hover\:rotate-90:hover {
+  transform: rotate(90deg);
+}
+
+/* Custom positioning for multiple alerts */
+.alert-stacked {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+/* Alert entrance animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Apply animations based on visibility */
+.translate-x-0 {
+  animation: slideInRight 0.3s ease-in-out;
+}
+
+.translate-x-full {
+  animation: slideOutRight 0.3s ease-in-out;
+}

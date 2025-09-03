@@ -1,0 +1,281 @@
+<!-- Modal Backdrop with Blur Effect -->
+<div *ngIf="show" class="modal-backdrop" (click)="onClose()">
+  
+  <!-- Modal Container -->
+  <div class="modal-container-large" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="flex items-center">
+        <div class="flex items-center justify-center w-8 h-8 bg-blue-500 rounded-full mr-3">
+          <i class="fas fa-tasks text-white text-sm"></i>
+        </div>
+        <div>
+          <h3>{{ mode === 'view' ? 'Sub-Actions' : 'Create Sub-Action' }}</h3>
+          <p *ngIf="mode === 'view' && action" class="text-sm text-gray-600 mt-1">
+            For action: {{ action.title }}
+          </p>
+        </div>
+      </div>
+      <button type="button" class="close-btn" (click)="onClose()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      
+      <!-- View Mode: List of existing sub-actions -->
+      <div *ngIf="mode === 'view' && !showCreateForm">
+        <!-- Sub-actions List -->
+        <div *ngIf="subActions.length > 0" class="space-y-4">
+          <div *ngFor="let subAction of subActions" class="border border-gray-200 rounded-lg p-4">
+            <div class="flex justify-between items-start mb-3">
+              <h4 class="font-semibold text-gray-900">{{ subAction.title }}</h4>
+              <span class="px-2 py-1 text-xs font-medium rounded-full"
+                    [ngClass]="getStatusBadgeClass(subAction.status)">
+                {{ subAction.status }}
+              </span>
+            </div>
+            
+            <p class="text-gray-600 text-sm mb-3" *ngIf="subAction.description">
+              {{ subAction.description }}
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <div class="flex items-center">
+                <i class="fas fa-user text-gray-400 mr-2"></i>
+                <span class="text-gray-600">{{ getUserDisplayName(subAction.assignedToId) }}</span>
+              </div>
+              <div class="flex items-center" *ngIf="subAction.dueDate">
+                <i class="fas fa-calendar-alt text-gray-400 mr-2"></i>
+                <span class="text-gray-600">{{ subAction.dueDate | date: 'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+              <div class="text-xs text-gray-500">
+                Created: {{ subAction.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+              </div>
+              <!-- Future: Add edit/delete buttons here if needed -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Empty state -->
+        <div *ngIf="subActions.length === 0" class="text-center py-8">
+          <i class="fas fa-tasks text-gray-300 text-4xl mb-4"></i>
+          <p class="text-gray-600 mb-2">No sub-actions created yet</p>
+          <p class="text-gray-500 text-sm">Break down this action into smaller, manageable tasks</p>
+        </div>
+        
+        <!-- Add Sub-action Button -->
+        <div class="mt-6 pt-4 border-t border-gray-200">
+          <button type="button" 
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  (click)="toggleCreateForm()">
+            <i class="fas fa-plus mr-2"></i>
+            Add New Sub-Action
+          </button>
+        </div>
+      </div>
+
+      <!-- Create Mode or Create Form within View Mode -->
+      <form *ngIf="mode === 'create' || showCreateForm" (ngSubmit)="onSubmit()" #actionForm="ngForm" class="space-y-4">
+      
+      <!-- Error Message -->
+      <div *ngIf="error" class="error-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ error }}
+      </div>
+      
+      <!-- Validation Error Messages -->
+      <div *ngIf="showValidationErrors && validationErrors.length > 0" class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="fas fa-exclamation-circle text-red-400"></i>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Please correct the following errors:</h3>
+            <div class="mt-2 text-sm text-red-700">
+              <ul class="list-disc list-inside space-y-1">
+                <li *ngFor="let error of validationErrors">{{ error }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Title -->
+      <div class="form-group">
+        <label for="subActionTitle">
+          <i class="fas fa-heading text-blue-500 mr-2"></i>
+          Sub-Action Title *
+        </label>
+        <input type="text" 
+               id="subActionTitle"
+               name="subActionTitle"
+               [(ngModel)]="subActionData.title"
+               required
+               maxlength="200"
+               [class]="getFieldErrorClass('title')"
+               placeholder="Enter a clear, concise sub-action title">
+        <div *ngIf="isFieldInvalid('title')" class="text-red-500 text-xs mt-1">
+          <i class="fas fa-exclamation-circle mr-1"></i>
+          Sub-action title is required
+        </div>
+      </div>
+
+      <!-- Assigned To -->
+      <div class="form-group">
+          <label for="subActionAssigned">
+            <i class="fas fa-user text-blue-500 mr-2"></i>
+            Assigned To *
+          </label>
+          <div class="user-search-container">
+            <input type="text"
+                   id="subActionAssigned"
+                   name="subActionAssigned"
+                   [(ngModel)]="userSearchTerm"
+                   (input)="onUserSearch($event)"
+                   (focus)="onUserInputFocus()"
+                   (blur)="onUserInputBlur()"
+                   (keydown)="onUserInputKeydown($event)"
+                   [readonly]="selectedUser !== null"
+                   [placeholder]="selectedUser ? selectedUser.fullName + ' (' + selectedUser.email + ')' : 'Search for a user by name, email, or company ID...'"
+                   autocomplete="off"
+                   [class]="getFieldErrorClass('assignedTo')"
+                   [class.readonly-input]="selectedUser !== null">
+            
+            <!-- User Dropdown -->
+            <div *ngIf="showUserDropdown" class="user-dropdown">
+              <div *ngFor="let user of filteredUsers" 
+                   class="user-option"
+                   (mousedown)="selectUser(user)">
+                <div class="user-info">
+                  <div class="user-name">{{ user.fullName || 'No Name' }}</div>
+                  <div class="user-email">{{ user.email }}</div>
+                  <div class="user-details">
+                    <span class="user-role">{{ user.role }}</span>
+                    <span class="user-company-id" *ngIf="user.companyId">ID: {{ user.companyId }}</span>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="filteredUsers.length === 0 && userSearchTerm" class="no-users-found">
+                No users found matching "{{ userSearchTerm }}"
+              </div>
+            </div>
+            
+            <!-- Selected User Display -->
+            <div *ngIf="selectedUser" class="selected-user">
+              <div class="selected-user-info">
+                <i class="fas fa-user-check text-green-500 mr-2"></i>
+                <div class="selected-user-details">
+                  <div class="selected-user-main">
+                    <span class="selected-user-name">{{ selectedUser.fullName || 'No Name' }}</span>
+                    <span class="selected-user-email">({{ selectedUser.email }})</span>
+                  </div>
+                  <div class="selected-user-meta">
+                    <span class="selected-user-role">{{ selectedUser.role }}</span>
+                    <span class="selected-user-company-id" *ngIf="selectedUser.companyId">ID: {{ selectedUser.companyId }}</span>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="clear-user-btn" (click)="clearSelectedUser()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div *ngIf="isFieldInvalid('assignedTo')" class="text-red-500 text-xs mt-1">
+            <i class="fas fa-exclamation-circle mr-1"></i>
+            Assigned user is required
+          </div>
+        </div>
+
+      <!-- Due Date -->
+      <div class="form-group">
+        <label for="subActionDueDate">
+          <i class="fas fa-calendar-alt text-blue-500 mr-2"></i>
+          Due Date
+        </label>
+        <input type="date" 
+               id="subActionDueDate"
+               name="subActionDueDate"
+               [(ngModel)]="subActionData.dueDate"
+               [min]="getTodayDate()"
+               [max]="getMaxDueDate()"
+               [class]="getFieldErrorClass('dueDate')">
+        <div *ngIf="isFieldInvalid('dueDate')" class="text-red-500 text-xs mt-1">
+          <i class="fas fa-exclamation-circle mr-1"></i>
+          Sub-action due date cannot exceed parent action deadline
+        </div>
+        <div *ngIf="action?.dueDate && !isFieldInvalid('dueDate')" class="text-xs text-gray-500 mt-1">
+          <i class="fas fa-info-circle mr-1"></i>
+          Sub-action due date cannot exceed parent action deadline: {{ action?.dueDate | date: 'dd/MM/yyyy' }}
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="subActionDescription">
+          <i class="fas fa-align-left text-blue-500 mr-2"></i>
+          Description *
+        </label>
+        <textarea id="subActionDescription"
+                  name="subActionDescription"
+                  [(ngModel)]="subActionData.description"
+                  required
+                  rows="4"
+                  maxlength="500"
+                  [class]="getFieldErrorClass('description')"
+                  placeholder="Describe the sub-action in detail. What needs to be done and how?"></textarea>
+        <div *ngIf="isFieldInvalid('description')" class="text-red-500 text-xs mt-1">
+          <i class="fas fa-exclamation-circle mr-1"></i>
+          Sub-action description is required
+        </div>
+        <div class="text-xs text-gray-400 mt-1 text-right">{{ subActionData.description.length }}/500</div>
+      </div>
+
+      <!-- Information Box -->
+      <div class="role-info">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          <p class="font-semibold mb-2">About Sub-Actions:</p>
+          <ul class="space-y-1 text-xs">
+            <li>• Sub-actions help break down main actions into detailed, manageable tasks</li>
+            <li>• Each sub-action can be assigned to different team members</li>
+            <li>• Sub-actions have their own status tracking and due dates</li>
+            <li>• Main action progress is calculated based on sub-action completion</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Modal Footer for Create Form -->
+      <div class="modal-footer">
+        <button type="button" 
+                class="btn-cancel"
+                (click)="showCreateForm ? toggleCreateForm() : onClose()">
+          <i class="fas fa-times"></i>
+          {{ showCreateForm ? 'Cancel' : 'Cancel' }}
+        </button>
+        <button type="submit"
+                class="btn-submit"
+                [disabled]="!isFormValid() || isLoading">
+          <i class="fas fa-plus"></i>
+          {{ isLoading ? 'Creating...' : 'Create Sub-Action' }}
+        </button>
+      </div>
+      </form>
+
+      <!-- Modal Footer for View Mode -->
+      <div *ngIf="mode === 'view' && !showCreateForm" class="modal-footer">
+        <button type="button" 
+                class="btn-cancel w-full"
+                (click)="onClose()">
+          <i class="fas fa-times"></i>
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

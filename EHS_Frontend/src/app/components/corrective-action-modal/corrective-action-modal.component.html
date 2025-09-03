@@ -1,0 +1,172 @@
+<!-- Modal Backdrop with Blur Effect -->
+<div *ngIf="show" class="modal-backdrop" (click)="onClose()">
+  
+  <!-- Modal Container -->
+  <div class="modal-container-large" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="flex items-center">
+        <div class="flex items-center justify-center w-8 h-8 bg-green-500 rounded-full mr-3">
+          <i class="fas fa-tools text-white text-sm"></i>
+        </div>
+        <h3>Create Corrective Action</h3>
+      </div>
+      <button type="button" class="close-btn" (click)="onClose()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <form (ngSubmit)="onSubmit()" #actionForm="ngForm" class="modal-body">
+      
+      <!-- Error Messages -->
+      <div *ngIf="error" class="error-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ error }}
+      </div>
+      
+      <!-- Validation Error Messages -->
+      <div *ngIf="showValidationErrors && validationErrors.length > 0" class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="fas fa-exclamation-circle text-red-400"></i>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Please correct the following errors:</h3>
+            <div class="mt-2 text-sm text-red-700">
+              <ul class="list-disc list-inside space-y-1">
+                <li *ngFor="let error of validationErrors">{{ error }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Title -->
+      <div class="form-group">
+        <label for="actionTitle">
+          <i class="fas fa-heading text-green-500 mr-2"></i>
+          Action Title *
+        </label>
+        <input type="text" 
+               id="actionTitle"
+               name="actionTitle"
+               [(ngModel)]="correctiveActionForm.title"
+               required
+               maxlength="200"
+               [class]="getFieldErrorClass('title')"
+               placeholder="Enter a clear, concise action title">
+        <div *ngIf="isFieldInvalid('title')" class="text-red-500 text-xs mt-1">
+          <i class="fas fa-exclamation-circle mr-1"></i>
+          Action title is required
+        </div>
+      </div>
+
+      <!-- Priority and Hierarchy Row -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-group">
+          <label for="actionPriority">
+            <i class="fas fa-flag text-green-500 mr-2"></i>
+            Priority *
+          </label>
+          <select id="actionPriority"
+                  name="actionPriority"
+                  [(ngModel)]="correctiveActionForm.priority"
+                  [class]="getFieldErrorClass('priority')"
+                  required>
+            <option value="" disabled>Select priority level</option>
+            <option *ngFor="let priority of priorityOptions" [value]="priority">{{ priority }}</option>
+          </select>
+          <div *ngIf="isFieldInvalid('priority')" class="text-red-500 text-xs mt-1">
+            <i class="fas fa-exclamation-circle mr-1"></i>
+            Priority selection is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="actionHierarchy">
+            <i class="fas fa-layer-group text-green-500 mr-2"></i>
+            Safety Hierarchy *
+          </label>
+          <select id="actionHierarchy"
+                  name="actionHierarchy"
+                  [(ngModel)]="correctiveActionForm.hierarchy"
+                  [class]="getFieldErrorClass('hierarchy')"
+                  required>
+            <option value="" disabled>Select hierarchy level</option>
+            <option *ngFor="let hierarchy of hierarchyOptions" [value]="hierarchy">{{ hierarchy }}</option>
+          </select>
+          <div *ngIf="isFieldInvalid('hierarchy')" class="text-red-500 text-xs mt-1">
+            <i class="fas fa-exclamation-circle mr-1"></i>
+            Safety hierarchy selection is required
+          </div>
+        </div>
+      </div>
+
+      <!-- Deadline -->
+      <div class="form-group">
+        <label for="actionDeadline">
+          <i class="fas fa-calendar-alt text-green-500 mr-2"></i>
+          Deadline
+        </label>
+        <input type="date" 
+               id="actionDeadline"
+               name="actionDeadline"
+               [(ngModel)]="correctiveActionForm.dueDate"
+               [min]="getTodayDate()">
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="actionDescription">
+          <i class="fas fa-align-left text-green-500 mr-2"></i>
+          Description *
+        </label>
+        <textarea id="actionDescription"
+                  name="actionDescription"
+                  [(ngModel)]="correctiveActionForm.description"
+                  [class]="getFieldErrorClass('description')"
+                  required
+                  rows="4"
+                  maxlength="1000"
+                  placeholder="Describe the corrective action in detail. What needs to be done and how?"></textarea>
+        <div *ngIf="isFieldInvalid('description')" class="text-red-500 text-xs mt-1">
+          <i class="fas fa-exclamation-circle mr-1"></i>
+          Action description is required
+        </div>
+        <div class="text-xs text-gray-400 mt-1 text-right">{{ correctiveActionForm.description.length }}/1000</div>
+      </div>
+
+      <!-- Information Box -->
+      <div class="role-info">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          <p class="font-semibold mb-2">About Corrective Actions:</p>
+          <ul class="space-y-1 text-xs">
+            <li>• Actions start with "Not Started" status and automatically update based on sub-actions</li>
+            <li>• Once created, actions can only be aborted (not edited or deleted)</li>
+            <li>• Sub-actions can be added to break down the main action into detailed tasks</li>
+            <li>• Action status becomes "Completed" when all sub-actions are completed</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button" 
+                class="btn-cancel"
+                (click)="onClose()">
+          <i class="fas fa-times"></i>
+          Cancel
+        </button>
+        <button type="submit"
+                class="btn-submit"
+                [disabled]="!isFormValid() || isLoading">
+          <i class="fas fa-plus"></i>
+          {{ isLoading ? 'Creating...' : 'Create Action' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

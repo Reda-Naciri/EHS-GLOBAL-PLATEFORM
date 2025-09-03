@@ -1,0 +1,25 @@
+<aside class="sidebar">
+  <div class="sidebar-logo"></div>
+  <nav class="sidebar-nav">
+    <a routerLink="/dashboard" routerLinkActive="active"><i class="fas fa-home"></i></a>
+    <a routerLink="/reports" routerLinkActive="active"><i class="fas fa-chart-bar"></i></a>
+    <a routerLink="/incident-dashboard" routerLinkActive="active"><i class="fa-solid fa-triangle-exclamation"></i></a>
+    <a routerLink="/actions" routerLinkActive="active" class="relative">
+      <i class="fa-solid fa-list-check"></i>
+      <!-- Red dot for overdue actions -->
+      <span *ngIf="hasOverdueActions" 
+            class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border border-white animate-pulse"
+            title="There are overdue actions or sub-actions"></span>
+    </a>
+    <a *ngIf="isAdmin" routerLink="/users" routerLinkActive="active" class="relative">
+      <i class="fa-solid fa-user"></i>
+      <!-- Red dot for pending user requests -->
+      <span *ngIf="hasPendingUsers" 
+            class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border border-white animate-pulse"
+            title="There are pending user requests"></span>
+    </a>
+    <a *ngIf="isAdmin" routerLink="/admin-parameters" routerLinkActive="active">
+      <i class="fas fa-cog"></i>
+    </a>
+  </nav>
+</aside>

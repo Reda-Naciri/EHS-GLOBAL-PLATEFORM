@@ -1,0 +1,78 @@
+<!-- Alert Container - Displays all active alerts -->
+<div class="alert-container">
+  <!-- Top Right Alerts -->
+  <div class="fixed top-20 right-4 z-[9999] space-y-2">
+    <app-shared-alert
+      *ngFor="let alert of getAlertsByPosition('top-right'); let i = index"
+      [type]="alert.type"
+      [message]="alert.message"
+      [show]="alert.show"
+      [autoHide]="alert.autoHide || false"
+      [autoHideDuration]="alert.autoHideDuration || 5000"
+      [position]="alert.position || 'top-right'"
+      [showProgressBar]="alert.showProgressBar !== false"
+      [allowClose]="alert.allowClose !== false"
+      (close)="onAlertClose(alert.id)"
+      [style.position]="'relative'"
+      [style.top]="'0'"
+      [style.right]="'0'">
+    </app-shared-alert>
+  </div>
+
+  <!-- Top Left Alerts -->
+  <div class="fixed top-20 left-4 z-[9999] space-y-2">
+    <app-shared-alert
+      *ngFor="let alert of getAlertsByPosition('top-left'); let i = index"
+      [type]="alert.type"
+      [message]="alert.message"
+      [show]="alert.show"
+      [autoHide]="alert.autoHide || false"
+      [autoHideDuration]="alert.autoHideDuration || 5000"
+      [position]="alert.position || 'top-left'"
+      [showProgressBar]="alert.showProgressBar !== false"
+      [allowClose]="alert.allowClose !== false"
+      (close)="onAlertClose(alert.id)"
+      [style.position]="'relative'"
+      [style.top]="'0'"
+      [style.left]="'0'">
+    </app-shared-alert>
+  </div>
+
+  <!-- Bottom Right Alerts -->
+  <div class="fixed bottom-4 right-4 z-[9999] space-y-2">
+    <app-shared-alert
+      *ngFor="let alert of getAlertsByPosition('bottom-right'); let i = index"
+      [type]="alert.type"
+      [message]="alert.message"
+      [show]="alert.show"
+      [autoHide]="alert.autoHide || false"
+      [autoHideDuration]="alert.autoHideDuration || 5000"
+      [position]="alert.position || 'bottom-right'"
+      [showProgressBar]="alert.showProgressBar !== false"
+      [allowClose]="alert.allowClose !== false"
+      (close)="onAlertClose(alert.id)"
+      [style.position]="'relative'"
+      [style.bottom]="'0'"
+      [style.right]="'0'">
+    </app-shared-alert>
+  </div>
+
+  <!-- Bottom Left Alerts -->
+  <div class="fixed bottom-4 left-4 z-[9999] space-y-2">
+    <app-shared-alert
+      *ngFor="let alert of getAlertsByPosition('bottom-left'); let i = index"
+      [type]="alert.type"
+      [message]="alert.message"
+      [show]="alert.show"
+      [autoHide]="alert.autoHide || false"
+      [autoHideDuration]="alert.autoHideDuration || 5000"
+      [position]="alert.position || 'bottom-left'"
+      [showProgressBar]="alert.showProgressBar !== false"
+      [allowClose]="alert.allowClose !== false"
+      (close)="onAlertClose(alert.id)"
+      [style.position]="'relative'"
+      [style.bottom]="'0'"
+      [style.left]="'0'">
+    </app-shared-alert>
+  </div>
+</div>

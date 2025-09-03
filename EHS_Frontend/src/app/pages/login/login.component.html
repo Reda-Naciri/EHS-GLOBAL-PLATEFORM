@@ -1,0 +1,136 @@
+<!-- Back to Home Button (Outside Container) -->
+<div class="back-to-home">
+  <a href="/" class="home-btn" style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
+    <span class="home-icon">←</span> Back to Home
+  </a>
+</div>
+
+<!-- Main Container -->
+<div class="container" id="container">
+  <!-- Top Logo -->
+  <div class="top-logo">
+    <img src="https://www.fclane.com/sites/default/files/partner_logos/polamcote-logo2.png" alt="Polamcote Logo" class="logo-img">
+  </div>
+
+  <!-- Sign Up Form -->
+  <div class="form-container sign-up">
+    <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()">
+      <h1 style="color: black">Request Account</h1>
+      
+      <input style="color:black" 
+             type="text" 
+             placeholder="Company ID (e.g., TE001234)"
+             formControlName="companyId"
+             required>
+      
+      <input style="color:black" 
+             type="text" 
+             placeholder="Full Name"
+             formControlName="fullName"
+             required>
+      
+      <input style="color:black" 
+             type="email" 
+             placeholder="Email"
+             formControlName="email"
+             required>
+      
+      <select style="color:gray" 
+              formControlName="department"
+              required>
+        <option value="">Select Department</option>
+        <option *ngFor="let dept of departments" [value]="dept.name">{{dept.name}}</option>
+      </select>
+      
+      <input style="color:black" 
+             type="text" 
+             placeholder="Position/Job Title"
+             formControlName="position"
+             required>
+
+      
+      <button type="submit" 
+              [disabled]="registerLoading"
+              [style.opacity]="registerLoading ? '0.6' : '1'">
+        {{ registerLoading ? 'Submitting...' : 'Request Account' }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Sign In Form -->
+  <div class="form-container sign-in">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <h1 style="color: black">Sign In</h1>
+      
+      <!-- Debug Info (Hidden by default) -->
+      <div *ngIf="showDebugInfo" style="background: #f0f0f0; padding: 8px; margin: 8px 0; border-radius: 5px; font-size: 11px;">
+        <p><strong>Debug:</strong> Valid: {{ loginForm.valid }} | Loading: {{ loading }}</p>
+      </div>
+
+      <!-- Email Input -->
+      <input 
+        style="color:black" 
+        type="email" 
+        placeholder="Email"
+        formControlName="email">
+      
+      <!-- Password Input -->
+      <input 
+        style="color: black" 
+        type="password" 
+        placeholder="Password"
+        formControlName="password">
+      
+
+      
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        [disabled]="loading"
+        [style.opacity]="loading ? '0.6' : '1'">
+        {{ loading ? 'Logging in...' : 'Log In' }}
+      </button>
+
+      
+    </form>
+  </div>
+
+  <!-- Toggle Container (Hidden on Mobile) -->
+  <div class="toggle-container">
+    <div class="toggle">
+      <!-- Left Panel -->
+      <div class="toggle-panel toggle-left">
+        <div style="margin-top: 80px; text-align: center;">
+          <img src="https://cdn.freebiesupply.com/logos/large/2x/te-connectivity-logo-black-and-white.png"
+               alt="TE Connectivity Logo"
+               style="height: 60px;">
+        </div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+          <h1 style="font-size: 24px; font-weight: bold;">Welcome Back!</h1>
+          <p>Have an account? Switch to Login</p>
+          <button style="color:black" class="hidden" id="login">Log In</button>
+        </div>
+      </div>
+
+      <!-- Right Panel -->
+      <div class="toggle-panel toggle-right">
+        <div style="margin-top: 80px; text-align: center;">
+          <img src="https://cdn.freebiesupply.com/logos/large/2x/te-connectivity-logo-black-and-white.png"
+               alt="TE Connectivity Logo"
+               style="height: 60px;">
+        </div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+          <h1 style="font-size: 24px; font-weight: bold;">Hello!</h1>
+          <p style="margin-top: 8px;">Request account from EHS admins.</p>
+          <button style="color:black" class="hidden" id="register" aria-label="Sign Up">
+            Sign Up
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Switch Button -->
+  <button class="switch-btn" id="mobileSwitch">Switch View</button>
+</div>
+

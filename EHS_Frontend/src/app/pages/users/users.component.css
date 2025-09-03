@@ -1,0 +1,174 @@
+/* Modern responsive CSS for users page */
+
+/* Table responsiveness */
+@media (max-width: 768px) {
+  .table-container {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Hide less important columns on mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  /* Compact table styling for mobile */
+  table th,
+  table td {
+    padding: 8px 4px !important;
+    font-size: 0.75rem !important;
+    vertical-align: top;
+  }
+  
+  /* Avatar size adjustment */
+  .avatar-mobile {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  
+  /* Make action buttons smaller */
+  .action-btn-mobile {
+    padding: 4px 8px !important;
+    font-size: 0.7rem !important;
+  }
+  
+  /* Status toggle smaller */
+  .status-toggle-mobile {
+    transform: scale(0.8);
+  }
+  
+  /* Role select smaller */
+  .role-select-mobile {
+    font-size: 0.7rem !important;
+    padding: 2px 4px !important;
+  }
+}
+
+/* Tablet responsiveness */
+@media (max-width: 1024px) and (min-width: 769px) {
+  table th,
+  table td {
+    padding: 10px 6px !important;
+    font-size: 0.85rem !important;
+  }
+  
+  /* Slightly smaller elements for tablet */
+  .avatar-tablet {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .action-btn-tablet {
+    padding: 6px 10px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Professional theme enhancements */
+.professional-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.professional-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.professional-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.professional-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Status indicators */
+.status-active {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.status-inactive {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+/* Role badges */
+.role-admin {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: white;
+}
+
+.role-hse {
+  background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+  color: white;
+}
+
+.role-profile {
+  background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
+  color: white;
+}
+
+/* Hover effects */
+.table-row-hover:hover {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Mobile-specific table layout */
+@media (max-width: 640px) {
+  /* Stack table data vertically for very small screens */
+  .mobile-stack {
+    display: block !important;
+    width: 100% !important;
+    border: none !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding: 16px !important;
+  }
+  
+  .mobile-stack td {
+    display: block !important;
+    width: 100% !important;
+    text-align: left !important;
+    border: none !important;
+    padding: 4px 0 !important;
+  }
+  
+  .mobile-stack td:before {
+    content: attr(data-label) ": ";
+    font-weight: bold;
+    display: inline-block;
+    width: 120px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .professional-card {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  }
+  
+  .table-row-hover:hover {
+    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  }
+}

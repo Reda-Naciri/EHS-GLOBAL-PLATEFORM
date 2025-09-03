@@ -1,0 +1,688 @@
+{
+  "info": {
+    "name": "HSEBackend API Testing Collection",
+    "description": "Comprehensive test collection for HSEBackend API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5225",
+      "type": "string"
+    },
+    {
+      "key": "jwtToken",
+      "value": "PUT_YOUR_JWT_TOKEN_HERE",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Public Endpoints",
+      "item": [
+        {
+          "name": "Submit Report - Valid Incident",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reporterId\": \"TE001\",\n  \"workShift\": \"Day\",\n  \"title\": \"Test Safety Incident Report\",\n  \"type\": \"Incident-Management\",\n  \"zone\": \"Production Area A\",\n  \"incidentDateTime\": \"2024-01-15T10:30:00\",\n  \"description\": \"Test incident description with sufficient detail to meet minimum requirements for validation.\",\n  \"injuredPersonsCount\": 1,\n  \"injuredPersons\": [\n    {\n      \"name\": \"John Doe\",\n      \"department\": \"Production\",\n      \"zoneOfPerson\": \"Area A\",\n      \"gender\": \"Male\",\n      \"selectedBodyPart\": \"head\",\n      \"injuryType\": \"Cut\",\n      \"severity\": \"Minor\",\n      \"injuryDescription\": \"Small cut on forehead from equipment\"\n    }\n  ],\n  \"immediateActionsTaken\": \"First aid applied, area secured, supervisor notified\",\n  \"actionStatus\": \"Completed\",\n  \"personInChargeOfActions\": \"Supervisor John Smith\",\n  \"dateActionsCompleted\": \"2024-01-15T11:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Submit a valid incident report with injured person"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Report - Near Miss",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reporterId\": \"TE002\",\n  \"workShift\": \"Afternoon\",\n  \"title\": \"Near Miss - Falling Object\",\n  \"type\": \"Near-Miss\",\n  \"zone\": \"Warehouse Section B\",\n  \"incidentDateTime\": \"2024-01-15T14:30:00\",\n  \"description\": \"A pallet nearly fell from the storage rack due to improper stacking. No injuries occurred but could have been serious.\",\n  \"injuredPersonsCount\": 0,\n  \"injuredPersons\": [],\n  \"immediateActionsTaken\": \"Area cordoned off, pallet repositioned, safety inspection scheduled\",\n  \"actionStatus\": \"In Progress\",\n  \"personInChargeOfActions\": \"Warehouse Manager\",\n  \"dateActionsCompleted\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Submit a near miss report"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Report - Invalid Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reporterId\": \"\",\n  \"workShift\": \"\",\n  \"title\": \"\",\n  \"type\": \"\",\n  \"zone\": \"\",\n  \"description\": \"Too short\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Test validation by submitting invalid data"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Registration Request - Valid",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Jane Smith\",\n  \"companyId\": \"TE004\",\n  \"email\": \"jane.smith@te.com\",\n  \"department\": \"Quality Assurance\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/register-request",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "register-request"]
+            },
+            "description": "Submit a valid registration request"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Registration Request - Duplicate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Jane Smith\",\n  \"companyId\": \"TE004\",\n  \"email\": \"jane.smith@te.com\",\n  \"department\": \"Quality Assurance\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/register-request",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "register-request"]
+            },
+            "description": "Test duplicate registration request (should fail)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reports Management (Authenticated)",
+      "item": [
+        {
+          "name": "Get All Reports",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Get all reports (HSE/Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Reports with Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports?type=Incident-Management&status=Pending&zone=Production",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "Incident-Management"
+                },
+                {
+                  "key": "status",
+                  "value": "Pending"
+                },
+                {
+                  "key": "zone",
+                  "value": "Production"
+                }
+              ]
+            },
+            "description": "Get reports with multiple filters"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Report Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "1"]
+            },
+            "description": "Get detailed information for a specific report"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Report Details - Non-existent",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "9999"]
+            },
+            "description": "Test with non-existent report ID (should return 404)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Report Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"In Progress\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "1", "status"]
+            },
+            "description": "Update the status of a specific report"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Comment to Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This incident has been reviewed by the HSE team. Initial investigation shows compliance with safety protocols.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/1/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "1", "comments"]
+            },
+            "description": "Add an internal comment to a report"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recent Reports",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/recent?limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "recent"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Get the most recent reports for dashboard"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Management (Authenticated)",
+      "item": [
+        {
+          "name": "Get All Registration Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/register-request",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "register-request"]
+            },
+            "description": "Get all registration requests (HSE/Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Registration Request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/register-request/1/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "register-request", "1", "approve"]
+            },
+            "description": "Approve a registration request"
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Registration Request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/register-request/1/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "register-request", "1", "reject"]
+            },
+            "description": "Reject a registration request"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pending Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pending-users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pending-users"]
+            },
+            "description": "Get all pending users (approved but not yet registered)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication Testing",
+      "item": [
+        {
+          "name": "Access Protected Endpoint - No Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Test access without JWT token (should return 401)"
+          },
+          "response": []
+        },
+        {
+          "name": "Access Protected Endpoint - Invalid Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid_jwt_token_here"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Test access with invalid JWT token (should return 401)"
+          },
+          "response": []
+        },
+        {
+          "name": "Access Protected Endpoint - Malformed Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer malformed.jwt.token"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Test access with malformed JWT token (should return 401)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling Tests",
+      "item": [
+        {
+          "name": "Submit Report - Invalid JSON",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reporterId\": \"TE001\",\n  \"workShift\": \"Day\",\n  \"title\": \"Test Report\",\n  \"type\": \"Incident-Management\",\n  \"zone\": \"Production Area A\",\n  \"incidentDateTime\": \"invalid-date-format\",\n  \"description\": \"Test description\",\n  \"injuredPersonsCount\": \"not-a-number\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Test with invalid data types"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Report - Special Characters",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reporterId\": \"TE001\",\n  \"workShift\": \"Day\",\n  \"title\": \"Test Report with Special Characters: @#$%^&*()_+\",\n  \"type\": \"Incident-Management\",\n  \"zone\": \"Production Area A\",\n  \"incidentDateTime\": \"2024-01-15T10:30:00\",\n  \"description\": \"Report with special characters: !@#$%^&*()_+{}[]|\\\\:;\\\"'<>,.?/~`\",\n  \"injuredPersonsCount\": 0,\n  \"injuredPersons\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Test with special characters in input"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Report - Unicode Characters",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reporterId\": \"TE001\",\n  \"workShift\": \"Day\",\n  \"title\": \"Test Report with Unicode: 测试 Тест العربية\",\n  \"type\": \"Incident-Management\",\n  \"zone\": \"Production Area A\",\n  \"incidentDateTime\": \"2024-01-15T10:30:00\",\n  \"description\": \"Unicode test: English, 中文, Русский, العربية, Español, Français, Deutsch, 日本語, 한국어\",\n  \"injuredPersonsCount\": 0,\n  \"injuredPersons\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Test with Unicode characters"
+          },
+          "response": []
+        },
+        {
+          "name": "Test Invalid Endpoint",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invalid-endpoint",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invalid-endpoint"]
+            },
+            "description": "Test with non-existent endpoint (should return 404)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Performance Tests",
+      "item": [
+        {
+          "name": "Submit Minimal Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reporterId\": \"TE001\",\n  \"workShift\": \"Day\",\n  \"title\": \"Minimal Test Report\",\n  \"type\": \"Near-Miss\",\n  \"zone\": \"Test Area\",\n  \"incidentDateTime\": \"2024-01-15T10:30:00\",\n  \"description\": \"Minimal test report for load testing purposes\",\n  \"injuredPersonsCount\": 0,\n  \"injuredPersons\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Minimal report for performance testing"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Complex Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reporterId\": \"TE001\",\n  \"workShift\": \"Day\",\n  \"title\": \"Complex Test Report with Multiple Injuries\",\n  \"type\": \"Incident-Management\",\n  \"zone\": \"Production Area A\",\n  \"incidentDateTime\": \"2024-01-15T10:30:00\",\n  \"description\": \"Complex test report with multiple injured persons for load testing purposes\",\n  \"injuredPersonsCount\": 3,\n  \"injuredPersons\": [\n    {\n      \"name\": \"Person 1\",\n      \"department\": \"Production\",\n      \"zoneOfPerson\": \"Area A\",\n      \"gender\": \"Male\",\n      \"selectedBodyPart\": \"head\",\n      \"injuryType\": \"Cut\",\n      \"severity\": \"Minor\",\n      \"injuryDescription\": \"First injury description\"\n    },\n    {\n      \"name\": \"Person 2\",\n      \"department\": \"Production\",\n      \"zoneOfPerson\": \"Area A\",\n      \"gender\": \"Female\",\n      \"selectedBodyPart\": \"hand\",\n      \"injuryType\": \"Burn\",\n      \"severity\": \"Moderate\",\n      \"injuryDescription\": \"Second injury description\"\n    },\n    {\n      \"name\": \"Person 3\",\n      \"department\": \"Production\",\n      \"zoneOfPerson\": \"Area A\",\n      \"gender\": \"Male\",\n      \"selectedBodyPart\": \"leg\",\n      \"injuryType\": \"Fracture\",\n      \"severity\": \"Severe\",\n      \"injuryDescription\": \"Third injury description\"\n    }\n  ],\n  \"immediateActionsTaken\": \"Emergency response activated, all persons evacuated to safe area\",\n  \"actionStatus\": \"In Progress\",\n  \"personInChargeOfActions\": \"Emergency Response Team\",\n  \"dateActionsCompleted\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Complex report with multiple injuries for performance testing"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Pre-request script to set dynamic values",
+          "// You can add logic here to generate dynamic test data",
+          "// For example, generate unique IDs or timestamps",
+          "",
+          "// Generate unique reporter ID for some tests",
+          "const uniqueId = 'TE' + Math.floor(Math.random() * 1000);",
+          "pm.collectionVariables.set('uniqueReporterId', uniqueId);",
+          "",
+          "// Generate current timestamp",
+          "const currentTime = new Date().toISOString();",
+          "pm.collectionVariables.set('currentTime', currentTime);"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script for all requests",
+          "// This will run after every request in the collection",
+          "",
+          "// Basic response time check",
+          "pm.test('Response time is less than 5000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// Check if response has proper headers",
+          "pm.test('Response has Content-Type header', function () {",
+          "    pm.expect(pm.response.headers.get('Content-Type')).to.exist;",
+          "});",
+          "",
+          "// Log response for debugging",
+          "console.log('Response Status:', pm.response.status);",
+          "console.log('Response Time:', pm.response.responseTime + 'ms');",
+          "",
+          "// Check for common HTTP status codes",
+          "pm.test('Status code is valid', function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+          "});"
+        ]
+      }
+    }
+  ]
+}

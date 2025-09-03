@@ -1,0 +1,19 @@
+/* Alert Container Styles */
+
+.alert-container {
+  pointer-events: none;
+}
+
+.alert-container > div {
+  pointer-events: auto;
+}
+
+/* Ensure alerts stack properly */
+.space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+/* Override positioning for stacked alerts */
+.fixed {
+  z-index: 9999;
+}

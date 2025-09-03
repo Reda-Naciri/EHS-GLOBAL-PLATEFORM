@@ -1,0 +1,443 @@
+/* Missing Tailwind CSS Classes */
+.focus\:border-blue-500:focus { border-color: #3b82f6 !important; }
+.border-blue-500 { border-color: #3b82f6 !important; }
+.focus\:ring-4:focus { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important; }
+.focus\:ring-blue-100:focus { box-shadow: 0 0 0 4px rgba(219, 234, 254, 0.5) !important; }
+
+/* Action Card Effects */
+.action-card {
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.action-card:last-child {
+  margin-bottom: 0;
+}
+
+/* Status Classes with Left and Right Border Coloring */
+.status-pending {
+  background: white;
+  border-left: 4px solid #f59e0b;
+  border-right: 4px solid #f59e0b;
+}
+
+.status-in-progress {
+  background: white;
+  border-left: 4px solid #3b82f6;
+  border-right: 4px solid #3b82f6;
+}
+
+.status-completed {
+  background: white;
+  border-left: 4px solid #10b981;
+  border-right: 4px solid #10b981;
+}
+
+.status-overdue {
+  background: white;
+  border-left: 4px solid #ef4444;
+  border-right: 4px solid #ef4444;
+}
+
+.status-on-hold {
+  background: white;
+  border-left: 4px solid #6b7280;
+  border-right: 4px solid #6b7280;
+}
+
+.status-canceled {
+  background: white;
+  border-left: 4px solid #ef4444;
+  border-right: 4px solid #ef4444;
+}
+
+/* Sub-action Items */
+.subaction-item {
+  border-left: 3px solid #d1d5db;
+  transition: all 0.2s ease;
+}
+
+.subaction-item:hover {
+  background-color: #f9f9f9;
+}
+
+/* Tab System */
+.tab-active {
+  border-bottom: 3px solid #3b82f6;
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.tab-inactive {
+  color: #6b7280;
+}
+
+/* Removed colored badges - using neutral styles instead */
+
+/* KPI Cards */
+.kpi-card {
+  transition: all 0.3s ease;
+  overflow: hidden !important;
+}
+
+.kpi-card:hover {
+  transform: scale(1.02);
+}
+
+.kpi-card > div:last-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.kpi-card h3 {
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  font-size: 0.7rem !important;
+  line-height: 0.9rem !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Details Dropdown */
+.details-dropdown {
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+}
+
+.details-dropdown.hidden {
+  max-height: 0;
+  transition: max-height 0.3s ease-in-out;
+}
+
+/* Removed all colored avatar and text classes - using neutral styles only */
+
+/* Responsive Improvements */
+@media (max-width: 768px) {
+  .action-card {
+    margin-bottom: 1rem;
+  }
+  
+  .flex-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  /* Ensure filters container stacks properly on mobile */
+  .bg-white.rounded-lg.shadow.p-6.mb-6 .flex.flex-col.md\\:flex-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  /* Make filter selects full width on small screens */
+  .bg-white.rounded-lg.shadow.p-6.mb-6 select {
+    min-width: 100%;
+    max-width: none;
+  }
+  
+  /* Stack search and buttons vertically on mobile */
+  .bg-white.rounded-lg.shadow.p-6.mb-6 .flex.flex-wrap.items-center.gap-3:last-child {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  
+  /* Make search input full width on mobile */
+  .bg-white.rounded-lg.shadow.p-6.mb-6 .relative.flex-1 {
+    min-width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  /* Adjust filter layout for tablets */
+  .bg-white.rounded-lg.shadow.p-6.mb-6 .flex.flex-wrap.items-center.gap-3:first-child {
+    justify-content: flex-start;
+  }
+  
+  /* Ensure adequate spacing for filters */
+  .bg-white.rounded-lg.shadow.p-6.mb-6 select {
+    font-size: 0.875rem;
+  }
+}
+
+/* Animation for toggle details */
+.toggle-details {
+  transition: transform 0.2s ease;
+}
+
+.toggle-details:hover {
+  transform: scale(1.1);
+}
+
+/* Custom Select Styling */
+select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Input Focus Styling */
+input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Button Hover Effects */
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+/* Removed priority badge sizing - using neutral styles only */
+
+/* Removed custom abort modal styles - now using standard confirmation dialog */
+
+/* Overdue indicator animations */
+.overdue-pulse {
+  animation: overduePulse 2s infinite;
+}
+
+@keyframes overduePulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Abort Message Styles */
+.abort-message-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.abort-message-content {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 500px;
+  width: 90%;
+  animation: slideInScale 0.4s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.abort-message-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  animation: progressBar 3s ease-out;
+}
+
+.abort-message-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.abort-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  margin-right: 16px;
+  animation: bounceIn 0.6s ease-out;
+}
+
+.abort-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.abort-description {
+  color: #6b7280;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.abort-reason-box {
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  animation: highlightReason 0.5s ease-out 0.3s both;
+}
+
+.abort-reason-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.abort-reason-text {
+  font-size: 16px;
+  color: #1f2937;
+  font-style: italic;
+}
+
+.abort-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.abort-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.abort-btn-cancel {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.abort-btn-cancel:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.abort-btn-confirm {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.abort-btn-confirm:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.abort-btn-confirm:active {
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes progressBar {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes highlightReason {
+  from {
+    background: #f9fafb;
+    border-color: #d1d5db;
+  }
+  to {
+    background: #fef3f2;
+    border-color: #fca5a5;
+  }
+}
+
+/* Success animation for when action is aborted */
+.abort-success {
+  animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+  0% {
+    background: #fef3f2;
+  }
+  50% {
+    background: #dcfce7;
+  }
+  100% {
+    background: #fef3f2;
+  }
+}
