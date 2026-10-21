@@ -39,8 +39,8 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     console.log('🔧 LoginComponent: Constructor called');
     
     this.loginForm = this.fb.group({
-      email: ['reda.naciri@te.com', [Validators.required, Validators.email]],
-      password: ['Admin123!', [Validators.required, Validators.minLength(6)]]
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
 
     this.registerForm = this.fb.group({
@@ -141,14 +141,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  testLogin() {
-    console.log('🔧 LoginComponent: Test login called');
-    this.loginForm.patchValue({
-      email: 'reda.naciri@te.com',
-      password: 'Admin123!'
-    });
-    this.onSubmit();
-  }
+  
 
   toggleDebug() {
     this.showDebugInfo = !this.showDebugInfo;

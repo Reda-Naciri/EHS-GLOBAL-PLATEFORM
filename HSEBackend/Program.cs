@@ -10,6 +10,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Local-only secrets override (gitignored), takes precedence over appsettings.json placeholders
+builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
+
 // 1. Add SQL Server + Identity
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -112,8 +115,9 @@ using (var scope = app.Services.CreateScope())
     await HSEBackend.Services.DatabaseSeeder.SeedAsync(userManager, roleManager, context);
 }
 
-// Configure static files for uploaded content
-app.UseStaticFiles(); // For wwwroot folder (avatars)
+// Configure static files for uploaded content and the built Angular app
+app.UseDefaultFiles(); // Serves wwwroot/index.html for "/"
+app.UseStaticFiles(); // For wwwroot folder (avatars, uploads, built Angular assets)
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -126,6 +130,9 @@ app.UseAuthentication();
 app.UseUserActiveStatusCheck();
 app.UseAuthorization();
 app.MapControllers();
+
+// Let the Angular app handle any route that isn't an API endpoint or a static file
+app.MapFallbackToFile("index.html");
 
 // One-time status update for corrective actions after startup
 _ = Task.Run(async () =>

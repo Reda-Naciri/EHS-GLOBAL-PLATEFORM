@@ -28,9 +28,15 @@ dist/
 
 # Environment files
 appsettings.local.json
+appsettings.Development.local.json
+appsettings.Production.local.json
 .env
 .env.local
 .env.production
+
+# Build/publish artifacts
+publish/
+*.zip
 
 # Temporary files
 *.tmp
@@ -52,5 +58,6 @@ logs/
 
 # Test results
 TestResults/
+
 # Claude Code settings
 .claude/
