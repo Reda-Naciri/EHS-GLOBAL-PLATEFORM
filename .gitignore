@@ -52,3 +52,5 @@ logs/
 
 # Test results
 TestResults/
+# Claude Code settings
+.claude/
