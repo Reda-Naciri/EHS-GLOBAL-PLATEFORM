@@ -56,9 +56,9 @@ builder.Services.AddCors(options =>
             if (origin.StartsWith("http://localhost:") || origin.StartsWith("https://localhost:"))
                 return true;
                 
-            // Allow any IP address on ports 4200-4210 (common Angular dev ports)
+            // Allow any IP address on ports 4200-4310 (common Angular dev ports)
             var uri = new Uri(origin);
-            return uri.Port >= 4200 && uri.Port <= 4210;
+            return uri.Port >= 4200 && uri.Port <= 4310;
         })
               .AllowAnyMethod()
               .AllowAnyHeader()
