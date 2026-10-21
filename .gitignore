@@ -38,6 +38,11 @@ appsettings.Production.local.json
 publish/
 *.zip
 
+# Built Angular app copied into the backend by restart-demo.sh --rebuild
+HSEBackend/wwwroot/*
+!HSEBackend/wwwroot/uploads/
+!HSEBackend/wwwroot/test.txt
+
 # Temporary files
 *.tmp
 *.temp

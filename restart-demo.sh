@@ -16,7 +16,7 @@ FRONTEND_DIR="$ROOT/EHS_Frontend"
 WWWROOT="$BACKEND_DIR/wwwroot"
 PORT=5225
 
-CLOUDFLARED="${CLOUDFLARED_PATH:-$HOME/cloudflared/cloudflared.exe}"
+CLOUDFLARED="${CLOUDFLARED_PATH:-$HOME/.cloudflared/cloudflared.exe}"
 BACKEND_LOG="$(mktemp -t ehs-backend-log.XXXXXX)"
 TUNNEL_LOG="$(mktemp -t ehs-tunnel-log.XXXXXX)"
 
